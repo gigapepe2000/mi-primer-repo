@@ -11,3 +11,6 @@ Estoy aprendiendo a usar GitHub paso a paso.
 Estoy aprendiendo Git y GitHub desde el celular.
 Añadiendo desde rama
 
+## Mi entorno
+
+Este cambio lo hice desde GitHub Codespaces.

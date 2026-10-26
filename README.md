@@ -1,2 +1,8 @@
 # mi-primer-repo
-Repositorio de prsctica
+Repositorio de práctica 
+
+# Mi primer repositorio
+
+Estoy aprendiendo a usar GitHub paso a paso.
+
+

@@ -1,16 +1,22 @@
-# mi-primer-repo
-Repositorio de práctica 
+# 🧰 Mi Panel de Herramientas Personales
 
-# Mi primer repositorio
+Este repositorio contiene una colección de herramientas web que uso a diario. 
+Todas funcionan de forma local en el navegador.
 
-Estoy aprendiendo a usar GitHub paso a paso.
+## 🌐 Acceso al Panel
+Puedes acceder a mi panel principal aquí:
+👉 **[Ir a mis herramientas](https://gigapepe2000.github.io/mi-primer-repo/)**
 
+## 🛠️ Herramientas incluidas
+* [💵 Contar Efectivo](https://gigapepe2000.github.io/mi-primer-repo/ContarEfectivo/)
+* [📊 Registro de Gastos](https://gigapepe2000.github.io/mi-primer-repo/gastos/)
+* *(Próximamente más...)*
 
-## Sobre mí
+## 🔒 Privacidad y Datos
+* Ninguna herramienta tiene login ni envía datos a internet.
+* Toda la información se guarda en el `localStorage` del dispositivo (tu teléfono o PC).
+* **Importante:** Como los datos son locales, si borras la caché del navegador se perderán. Usa siempre los botones de **Exportar/Importar** de cada herramienta para hacer copias de seguridad de tus datos.
 
-Estoy aprendiendo Git y GitHub desde el celular.
-Añadiendo desde rama
-
-## Mi entorno
-
-Este cambio lo hice desde GitHub Codespaces.
+## 💻 Tecnologías
+* HTML, CSS y JavaScript (Vanilla).
+* Alojado gratuitamente con **GitHub Pages**.

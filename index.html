@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Efectivo</title>
+    <style>
+        :root {
+            --primary: #64a6e2;
+            --primary-dark: #4a8acb;
+            --light: #f8fbff;
+            --gray: #e9ecef;
+            --dark: #2d3748;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            margin: 0;
+            padding: 20px 12px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            font-weight: 600;
+            margin: 0.4em 0 0.8em;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 1.4rem;
+        }
+
+        .tab {
+            padding: 12px 28px;
+            cursor: pointer;
+            background: white;
+            border: 2px solid var(--gray);
+            border-radius: 999px;
+            font-weight: 500;
+            transition: all 0.18s;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(100,166,226,0.28);
+        }
+
+        .content {
+            display: none;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            padding: 1px;
+        }
+
+        .content.active { display: block; }
+
+        .content {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            min-width: 430px;
+            border-collapse: collapse;
+            font-size: 1.5rem;
+        }
+
+        th, td { white-space: nowrap; }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 14px 8px;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 12px 8px;
+            text-align: center;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        input[type="number"] {
+            width: 100%;
+            max-width: 110px;
+            padding: 10px;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 2px solid var(--gray);
+            border-radius: 10px;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(100,166,226,0.2);
+        }
+
+        .total-fila {
+            font-weight: 600;
+            color: #2f855a;
+            min-width: 80px;
+            font-size: 1.5rem;
+        }
+
+        .grand-total {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            background: rgba(100,166,226,0.08);
+            padding: 20px;
+            border-radius: 16px;
+            margin: 24px 0;
+        }
+
+        .reset-btn {
+            display: block;
+            margin: 24px auto;
+            padding: 14px 40px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: white;
+            background: #f56565;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reset-btn:hover {
+            background: #e53e3e;
+            transform: translateY(-1px);
+        }
+
+        .font-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0 4px;
+        }
+
+        .font-btn {
+            width: 56px;
+            height: 40px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            border-radius: 999px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            transition: all 0.18s;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .font-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Calculadora de Efectivo</h1>
+
+    <div class="font-controls">
+        <button class="font-btn" id="btn-aumentar" title="Aumentar texto">A+</button>
+        <button class="font-btn" id="btn-font-reset" title="Restablecer tamaño">↺</button>
+        <button class="font-btn" id="btn-disminuir" title="Disminuir texto">A−</button>
+    </div>
+<br>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="billetes">Billetes</div>
+        <div class="tab" data-tab="monedas">Monedas</div>
+    </div>
+
+    <div id="billetes" class="content active">
+        <table>
+            <thead>
+                <tr><th>Denom.</th><th>Cant</th><th>Subt.</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>1</td><td><input type="number" min="0" data-denom="1"></td><td class="total-fila">0</td></tr>
+                <tr><td>3</td><td><input type="number" min="0" data-denom="3"></td><td class="total-fila">0</td></tr>
+                <tr><td>5</td><td><input type="number" min="0" data-denom="5"></td><td class="total-fila">0</td></tr>
+                <tr><td>10</td><td><input type="number" min="0" data-denom="10"></td><td class="total-fila">0</td></tr>
+                <tr><td>20</td><td><input type="number" min="0" data-denom="20"></td><td class="total-fila">0</td></tr>
+                <tr><td>50</td><td><input type="number" min="0" data-denom="50"></td><td class="total-fila">0</td></tr>
+                <tr><td>100</td><td><input type="number" min="0" data-denom="100"></td><td class="total-fila">0</td></tr>
+                <tr><td>200</td><td><input type="number" min="0" data-denom="200"></td><td class="total-fila">0</td></tr>
+                <tr><td>500</td><td><input type="number" min="0" data-denom="500"></td><td class="total-fila">0</td></tr>
+                <tr><td>1000</td><td><input type="number" min="0" data-denom="1000"></td><td class="total-fila">0</td></tr>
+            <tr><td>2000</td><td><input type="number" min="0" data-denom="2000"></td><td class="total-fila">0</td></tr>
+             <tr><td>5000</td><td><input type="number" min="0" data-denom="5000"></td><td class="total-fila">0</td></tr>
+            <tr><td>10000</td><td><input type="number" min="0" data-denom="10000"></td><td class="total-fila">0</td></tr>
+            <tr><td>20000</td><td><input type="number" min="0" data-denom="20000"></td><td class="total-fila">0</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="monedas" class="content">
+        <table>
+            <thead>
+                <tr><th>Denominación</th><th>Cantidad</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>5 cts</td><td><input type="number" min="0" data-denom="0.05"></td><td class="total-fila">0</td></tr>
+                <tr><td>20 cts</td><td><input type="number" min="0" data-denom="0.20"></td><td class="total-fila">0</td></tr>
+                <tr><td>1</td><td><input type="number" min="0" data-denom="1"></td><td class="total-fila">0</td></tr>
+                <tr><td>3</td><td><input type="number" min="0" data-denom="3"></td><td class="total-fila">0</td></tr>
+                <tr><td>5</td><td><input type="number" min="0" data-denom="5"></td><td class="total-fila">0</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="grand-total">Total: <span id="total-general">$0.00</span></div>
+
+    <button class="reset-btn" onclick="reiniciarCalculadora()">Reiniciar todo</button>
+
+    <div class="footer">
+        <a href="mailto:gigapepe2000@gmail.cu">Ing Giuseppe</a>
+    </div>
+
+</div>
+
+<script>
+    const STORAGE_KEY = 'calculadora_efectivo_values';
+
+    function cargarValores() {
+        const datos = localStorage.getItem(STORAGE_KEY);
+        if (!datos) return;
+        try {
+            const valores = JSON.parse(datos);
+            document.querySelectorAll('input[data-denom]').forEach(input => {
+                const denom = input.getAttribute('data-denom');
+                if (valores[denom] !== undefined) input.value = valores[denom];
+            });
+            calcularTotal();
+        } catch(e) {}
+    }
+
+    function guardarValores() {
+        const valores = {};
+        document.querySelectorAll('input[data-denom]').forEach(input => {
+            const denom = input.getAttribute('data-denom');
+            const val = input.value.trim();
+            if (val !== '') valores[denom] = val;
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(valores));
+    }
+
+    function calcularTotal() {
+        let total = 0;
+
+        document.querySelectorAll('input[data-denom]').forEach(input => {
+            const denom = parseFloat(input.getAttribute('data-denom'));
+            const cant  = parseFloat(input.value) || 0;
+            const subtotal = denom * cant;
+
+            const celda = input.parentElement.nextElementSibling;
+
+            if (subtotal === 0) {
+                celda.textContent = '0';
+            } else if (Number.isInteger(subtotal)) {
+                celda.textContent = subtotal;
+            } else {
+                celda.textContent = subtotal.toFixed(2);
+            }
+
+            total += subtotal;
+        });
+
+        const totalStr = total.toFixed(2);
+        const [entero, decimal] = totalStr.split('.');
+        const enteroFormateado = entero.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        document.getElementById('total-general').textContent = '$' + enteroFormateado + '.' + decimal;
+    }
+
+    function reiniciarCalculadora() {
+        if (!confirm('¿Borrar todos los valores?')) return;
+        document.querySelectorAll('input[type="number"]').forEach(i => i.value = '');
+        localStorage.removeItem(STORAGE_KEY);
+        calcularTotal();
+    }
+
+    // Eventos
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab).classList.add('active');
+        });
+    });
+
+    document.addEventListener('input', e => {
+        if (e.target.matches('input[type="number"]')) {
+            calcularTotal();
+            guardarValores();
+        }
+    });
+
+
+    // ===== Control de tamaño de texto =====
+    const FONT_KEY = 'calculadora_efectivo_font';
+    const FONT_BASE = 16;
+    const FONT_MIN = 11;
+    const FONT_MAX = 24;
+    let fontSize = FONT_BASE;
+
+    function aplicarFontSize(px) {
+        fontSize = Math.min(FONT_MAX, Math.max(FONT_MIN, px));
+        document.documentElement.style.fontSize = fontSize + 'px';
+        localStorage.setItem(FONT_KEY, fontSize);
+    }
+
+    function cargarFontSize() {
+        const guardado = parseFloat(localStorage.getItem(FONT_KEY));
+        if (!isNaN(guardado)) {
+            fontSize = guardado;
+            document.documentElement.style.fontSize = fontSize + 'px';
+        }
+    }
+
+    document.getElementById('btn-aumentar').addEventListener('click', () => aplicarFontSize(fontSize + 1));
+    document.getElementById('btn-disminuir').addEventListener('click', () => aplicarFontSize(fontSize - 1));
+    document.getElementById('btn-font-reset').addEventListener('click', () => aplicarFontSize(FONT_BASE));
+
+    // Inicio
+    cargarFontSize();
+
+    // Inicio
+    cargarValores();
+    calcularTotal();
+</script>
+
+</body>
+</html>

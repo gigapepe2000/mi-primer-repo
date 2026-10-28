@@ -1,1 +1,700 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cálculos Médicos — Herramientas de Consulta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F6F5;
+    --surface:#FFFFFF;
+    --surface-alt:#E9F0EE;
+    --ink:#152726;
+    --ink-soft:#5C716F;
+    --primary:#1F5D57;
+    --primary-dark:#123A36;
+    --line:#DAE4E1;
+    --line-strong:#C3D2CE;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
 
+  /* ---------- Top bar ---------- */
+  .topbar{
+    background:var(--primary-dark);
+    color:#EAF3F1;
+    padding:20px 28px 0;
+  }
+  .topbar-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding-bottom:18px;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .brand-mark{
+    width:38px;height:38px;
+    border-radius:8px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.18);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:18px;
+    flex-shrink:0;
+  }
+  .brand-text{display:flex;flex-direction:column;line-height:1.2;}
+  .brand-text strong{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;letter-spacing:.01em;}
+  .brand-text span{font-size:11px;color:#9FC1BC;letter-spacing:.08em;text-transform:uppercase;}
+
+  .help-btn{
+    width:34px;height:34px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,0.25);
+    background:rgba(255,255,255,0.08);
+    color:#fff;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:background .15s ease;
+  }
+  .help-btn:hover{background:rgba(255,255,255,0.18);}
+
+  .tab-index{
+    display:flex;
+    gap:2px;
+    padding:12px 0 0;
+    overflow-x:auto;
+  }
+  .tab-item{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    background:transparent;
+    border:none;
+    border-bottom:3px solid transparent;
+    border-radius:7px 7px 0 0;
+    color:#C7DBD8;
+    padding:10px 14px 9px;
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:14px;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .tab-num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:#fff;
+    background:var(--dot,#3E8E7E);
+    width:20px;height:20px;
+    border-radius:5px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .tab-item:hover{
+    background:rgba(255,255,255,0.06);
+    color:#fff;
+  }
+  .tab-item.active{
+    background:rgba(255,255,255,0.08);
+    color:#fff;
+    border-bottom-color:var(--dot,#3E8E7E);
+  }
+
+  /* ---------- Main content ---------- */
+  .content{padding:40px 24px 60px;max-width:720px;margin:0 auto;}
+  .panel{display:none;animation:fade .35s ease;}
+  .panel.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .panel-eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--tool-accent,var(--primary));
+    display:flex;align-items:center;gap:8px;
+    margin-bottom:8px;
+  }
+  .panel-eyebrow::before{
+    content:"";
+    width:16px;height:2px;
+    background:var(--tool-accent,var(--primary));
+    display:inline-block;
+  }
+  .panel h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:28px;
+    font-weight:600;
+    margin:0 0 8px;
+    color:var(--ink);
+  }
+  .panel-desc{
+    color:var(--ink-soft);
+    font-size:14.5px;
+    line-height:1.55;
+    margin:0 0 28px;
+    max-width:56ch;
+  }
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px 26px 22px;
+  }
+
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+  .field label{
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  .field input, .field select{
+    border:1px solid var(--line-strong);
+    border-radius:6px;
+    padding:11px 12px;
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:15px;
+    background:#FCFDFD;
+    color:var(--ink);
+    width:100%;
+  }
+  .field input:focus, .field select:focus{
+    outline:none;
+    border-color:var(--tool-accent,var(--primary));
+    box-shadow:0 0 0 3px rgba(var(--tool-accent-rgb,31,93,87),0.15);
+  }
+  .field-row{display:flex;gap:12px;}
+  .field-row .field{flex:1;}
+  .field-note{font-size:12px;color:var(--ink-soft);margin-top:-8px;margin-bottom:16px;line-height:1.4;}
+
+  .btn{
+    width:100%;
+    padding:12px 16px;
+    border:none;
+    border-radius:7px;
+    background:var(--tool-accent,var(--primary));
+    color:#fff;
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:filter .15s ease, transform .1s ease;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn:active{transform:scale(0.99);}
+
+  /* ---------- Result slip ---------- */
+  .result-slip{
+    margin-top:20px;
+    background:var(--surface-alt);
+    border:1px solid var(--line-strong);
+    border-left:4px solid var(--tool-accent,var(--primary));
+    border-radius:0 8px 8px 0;
+    padding:16px 18px;
+    display:none;
+  }
+  .result-slip.show{display:block;animation:fade .3s ease;}
+  .result-slip-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--tool-accent,var(--primary));
+    margin-bottom:8px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .result-slip-label::after{
+    content:"";
+    flex:1;
+    border-bottom:1px dashed var(--line-strong);
+  }
+  .result-line{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13.5px;
+    color:var(--ink);
+    display:flex;
+    justify-content:space-between;
+    padding:3px 0;
+  }
+  .result-line span:first-child{color:var(--ink-soft);}
+  .result-line.total{
+    margin-top:6px;
+    padding-top:10px;
+    border-top:1px solid var(--line-strong);
+    font-size:16px;
+    font-weight:600;
+  }
+  .result-line.align-right{justify-content:flex-end;}
+  .result-line.align-right span:first-child{color:var(--ink);}
+  .result-error{
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:13.5px;
+    color:#B3452F;
+  }
+
+  .final-note{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:18px;
+    padding-top:14px;
+    border-top:1px solid var(--line);
+    line-height:1.5;
+  }
+
+  .page-footer{
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-soft);
+    padding:0 24px 34px;
+  }
+  .page-footer a{color:var(--primary);text-decoration:none;}
+  .page-footer a:hover{text-decoration:underline;}
+
+  /* ---------- Modal de ayuda ---------- */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(10,24,22,0.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:50;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal{
+    background:#fff;
+    border-radius:12px;
+    max-width:440px;
+    width:100%;
+    padding:24px 24px 20px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.28);
+    animation:fade .2s ease;
+  }
+  .modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:10px;
+    gap:12px;
+  }
+  .modal-header h2{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:19px;
+    margin:0;
+    color:var(--ink);
+  }
+  .modal-close{
+    background:none;
+    border:none;
+    font-size:20px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    line-height:1;
+    padding:2px 4px;
+    flex-shrink:0;
+  }
+  .modal-close:hover{color:var(--ink);}
+  .modal-body{font-size:13.5px;color:var(--ink-soft);line-height:1.6;}
+  .modal-body p{margin:0 0 10px;}
+  .modal-body ul{margin:0 0 12px;padding-left:18px;}
+  .modal-body li{margin-bottom:5px;}
+  .modal-body strong{color:var(--ink);}
+
+  /* ---------- Mobile ---------- */
+  @media (max-width:600px){
+    .topbar{padding:16px 18px 0;}
+    .brand-text strong{font-size:15.5px;}
+    .content{padding:28px 18px 50px;}
+  }
+</style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-row">
+      <div class="brand">
+        <div class="brand-mark">℞</div>
+        <div class="brand-text">
+          <strong>Cálculos Médicos</strong>
+          <span>Herramientas de consulta</span>
+        </div>
+      </div>
+      <button class="help-btn" onclick="openHelp()" aria-label="Ayuda">?</button>
+    </div>
+    <nav class="tab-index">
+      <button class="tab-item active" style="--dot:#1F5D57" onclick="openPanel('Glucosa', this)"><span class="tab-num" style="--dot:#1F5D57">01</span>Glucosa</button>
+      <button class="tab-item" style="--dot:#C98A3E" onclick="openPanel('IMC', this)"><span class="tab-num" style="--dot:#C98A3E">02</span>IMC</button>
+      <button class="tab-item" style="--dot:#3B6E8F" onclick="openPanel('Peso', this)"><span class="tab-num" style="--dot:#3B6E8F">03</span>Peso neonatal</button>
+      <button class="tab-item" style="--dot:#B3452F" onclick="openPanel('Dosis', this)"><span class="tab-num" style="--dot:#B3452F">04</span>Dosis</button>
+      <button class="tab-item" style="--dot:#5C7A4B" onclick="openPanel('Dieta', this)"><span class="tab-num" style="--dot:#5C7A4B">05</span>Dieta embarazo</button>
+    </nav>
+  </header>
+
+  <main class="content">
+
+    <!-- 01 GLUCOSA -->
+    <section id="Glucosa" class="panel active" style="--tool-accent:#1F5D57;--tool-accent-rgb:31,93,87;">
+      <div class="panel-eyebrow">01 · Conversión</div>
+      <h1>Conversor de glucosa</h1>
+      <p class="panel-desc">Convierte valores de glucemia entre milimoles por litro y miligramos por decilitro.</p>
+      <div class="card">
+        <div class="field">
+          <label>Sentido de conversión</label>
+          <select id="glucosaUnit">
+            <option value="mmolL">mmol/L → mg/dL</option>
+            <option value="mgdL">mg/dL → mmol/L</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Valor</label>
+          <input type="number" id="glucosaValue" placeholder="Ej: 5.5">
+        </div>
+        <button class="btn" onclick="convertGlucosa()">Convertir</button>
+        <div class="result-slip" id="glucosaSlip">
+          <div class="result-slip-label">Resultado</div>
+          <div id="glucosaResult"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 IMC -->
+    <section id="IMC" class="panel" style="--tool-accent:#C98A3E;--tool-accent-rgb:201,138,62;">
+      <div class="panel-eyebrow">02 · Antropometría</div>
+      <h1>Calculadora de IMC</h1>
+      <p class="panel-desc">Calcula el índice de masa corporal a partir del peso y la altura.</p>
+      <div class="card">
+        <div class="field-row">
+          <div class="field">
+            <label>Peso (kg)</label>
+            <input type="number" id="weight" placeholder="Ej: 68">
+          </div>
+          <div class="field">
+            <label>Altura (m)</label>
+            <input type="number" id="height" placeholder="Ej: 1.65">
+          </div>
+        </div>
+        <button class="btn" onclick="calculateIMC()">Calcular IMC</button>
+        <div class="result-slip" id="imcSlip">
+          <div class="result-slip-label">Resultado</div>
+          <div id="imcResult"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 PESO NEONATAL -->
+    <section id="Peso" class="panel" style="--tool-accent:#3B6E8F;--tool-accent-rgb:59,110,143;">
+      <div class="panel-eyebrow">03 · Conversión</div>
+      <h1>Conversor de peso neonatal</h1>
+      <p class="panel-desc">Convierte el peso del recién nacido entre gramos y libras/onzas.</p>
+      <div class="card">
+        <div class="field">
+          <label>Sentido de conversión</label>
+          <select id="weightUnit">
+            <option value="gramsToPounds">Gramos → Libras y onzas</option>
+            <option value="poundsToGrams">Libras y onzas → Gramos</option>
+          </select>
+        </div>
+        <div id="gramsInput" class="field">
+          <label>Gramos</label>
+          <input type="number" id="weightValue" placeholder="Ej: 3200">
+        </div>
+        <div id="poundsInput" class="field-row" style="display:none;">
+          <div class="field">
+            <label>Libras</label>
+            <input type="number" id="pounds" placeholder="Ej: 7">
+          </div>
+          <div class="field">
+            <label>Onzas</label>
+            <input type="number" id="ounces" placeholder="Ej: 5">
+          </div>
+        </div>
+        <button class="btn" onclick="convertWeight()">Convertir</button>
+        <div class="result-slip" id="weightSlip">
+          <div class="result-slip-label">Resultado</div>
+          <div id="weightResult"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 DOSIS -->
+    <section id="Dosis" class="panel" style="--tool-accent:#B3452F;--tool-accent-rgb:179,69,47;">
+      <div class="panel-eyebrow">04 · Farmacología</div>
+      <h1>Cálculo de dosis</h1>
+      <p class="panel-desc">Calcula la dosis por toma según peso, composición y posología.</p>
+      <div class="card">
+        <div class="field">
+          <label>Peso del paciente (kg)</label>
+          <input type="number" id="peso" placeholder="Ej: 12">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Composición — cantidad (mg)</label>
+            <input type="number" id="mg" placeholder="Ej: 100">
+          </div>
+          <div class="field">
+            <label>Composición — volumen (mL)</label>
+            <input type="number" id="ml" placeholder="Ej: 5">
+          </div>
+        </div>
+        <p class="field-note">Para tabletas, coloque 1 en el campo de volumen. El resultado se expresará en "tabletas".</p>
+        <div class="field-row">
+          <div class="field">
+            <label>Posología (mg/kg/día)</label>
+            <input type="number" id="posologia" placeholder="Ej: 5">
+          </div>
+          <div class="field">
+            <label>Veces al día</label>
+            <input type="number" id="veces" placeholder="Ej: 3">
+          </div>
+        </div>
+        <button class="btn" onclick="calcularDosis()">Calcular dosis</button>
+        <div class="result-slip" id="dosisSlip">
+          <div class="result-slip-label">Resultado</div>
+          <div id="resultadoDosis"></div>
+        </div>
+        <p class="final-note">Esta herramienta es de ayuda. Compruebe siempre los resultados utilizando métodos tradicionales.</p>
+      </div>
+    </section>
+
+    <!-- 05 DIETA EMBARAZO -->
+    <section id="Dieta" class="panel" style="--tool-accent:#5C7A4B;--tool-accent-rgb:92,122,75;">
+      <div class="panel-eyebrow">05 · Nutrición</div>
+      <h1>Dieta de la embarazada</h1>
+      <p class="panel-desc">Estima el requerimiento calórico diario a partir de la tasa metabólica basal por edad, el peso ideal según estatura (IMC de referencia 22.9 kg/m²) y la adición energética del trimestre de gestación.</p>
+      <div class="card">
+        <div class="field-row">
+          <div class="field">
+            <label>Edad (años)</label>
+            <input type="number" id="edadEmb" placeholder="Ej: 24">
+          </div>
+          <div class="field">
+            <label>Estatura (cm)</label>
+            <input type="number" id="estaturaEmb" placeholder="Ej: 160">
+          </div>
+        </div>
+        <div class="field">
+          <label>Trimestre de embarazo</label>
+          <select id="trimestreEmb">
+            <option value="1">1.º trimestre (+85 kcal/día)</option>
+            <option value="2">2.º trimestre (+285 kcal/día)</option>
+            <option value="3">3.º trimestre (+475 kcal/día)</option>
+          </select>
+        </div>
+        <button class="btn" onclick="calcularDieta()">Calcular dieta</button>
+        <div class="result-slip" id="dietaSlip">
+          <div class="result-slip-label">Reporte nutricional</div>
+          <div id="dietaResult"></div>
+        </div>
+        <p class="final-note">Peso ideal calculado como 22.9 × (estatura en m)², equivalente al percentil 50 de las tablas antropométricas. TMB según tabla de edad; se toma el límite inferior de cada rango como frontera (ej.: 14 años exactos usa el rango 14–16). Esta herramienta es orientativa: valide siempre el resultado con criterio clínico individualizado.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="page-footer">
+    <!--  <a href="mailto:gigapepe2000@gmail.com">Ing. Giuseppe</a>  -->
+  </footer>
+
+  <!-- Modal de ayuda -->
+  <div class="modal-overlay" id="helpModal" onclick="if(event.target===this)closeHelp()">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Guía rápida</h2>
+        <button class="modal-close" onclick="closeHelp()" aria-label="Cerrar">×</button>
+      </div>
+      <div class="modal-body">
+        <p>Esta página reúne 5 herramientas de cálculo para apoyo clínico. Selecciona una pestaña arriba, completa los campos y pulsa el botón de calcular.</p>
+        <ul>
+          <li><strong>Glucosa:</strong> convierte entre mmol/L y mg/dL.</li>
+          <li><strong>IMC:</strong> índice de masa corporal a partir de peso y altura.</li>
+          <li><strong>Peso neonatal:</strong> convierte entre gramos y libras/onzas.</li>
+          <li><strong>Dosis:</strong> dosis por toma según peso, composición y posología.</li>
+          <li><strong>Dieta embarazo:</strong> requerimiento calórico diario según edad, estatura y trimestre.</li>
+        </ul>
+        <p>Todos los resultados son orientativos. Valide siempre con criterio clínico y métodos tradicionales.</p>
+      </div>
+     </strong><p>Desarrollador: <a href="mailto:gigapepe2000@gmail.com">Ing. Giuseppe</a></p>
+    </div>
+  </div>
+
+<script>
+  // ---------- Navegación de pestañas ----------
+  function openPanel(panelId, elmnt){
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+    elmnt.classList.add('active');
+  }
+
+  // ---------- Modal de ayuda ----------
+  function openHelp(){
+    document.getElementById('helpModal').classList.add('show');
+  }
+  function closeHelp(){
+    document.getElementById('helpModal').classList.remove('show');
+  }
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeHelp();
+  });
+
+  // ---------- 01 Glucosa ----------
+  function convertGlucosa(){
+    const unit = document.getElementById('glucosaUnit').value;
+    const value = parseFloat(document.getElementById('glucosaValue').value);
+    const slip = document.getElementById('glucosaSlip');
+    const out = document.getElementById('glucosaResult');
+    if(isNaN(value)){
+      out.innerHTML = '<div class="result-error">Ingresa un valor válido.</div>';
+      slip.classList.add('show');
+      return;
+    }
+    const result = unit === 'mmolL' ? value * 18 : value / 18;
+    const label = unit === 'mmolL' ? 'mg/dL' : 'mmol/L';
+    out.innerHTML = `<div class="result-line total align-right"><span>${result.toFixed(2)} ${label}</span></div>`;
+    slip.classList.add('show');
+  }
+
+  // ---------- 02 IMC ----------
+  function calculateIMC(){
+    const weight = parseFloat(document.getElementById('weight').value);
+    const height = parseFloat(document.getElementById('height').value);
+    const slip = document.getElementById('imcSlip');
+    const out = document.getElementById('imcResult');
+    if(!(weight > 0 && height > 0)){
+      out.innerHTML = '<div class="result-error">Ingresa valores válidos.</div>';
+      slip.classList.add('show');
+      return;
+    }
+    const imc = weight / (height * height);
+    out.innerHTML = `<div class="result-line total"><span>IMC</span><span>${imc.toFixed(2)} kg/m²</span></div>`;
+    slip.classList.add('show');
+  }
+
+  // ---------- 03 Peso neonatal ----------
+  document.getElementById('weightUnit').addEventListener('change', function(){
+    const unit = this.value;
+    document.getElementById('gramsInput').style.display = unit === 'gramsToPounds' ? 'flex' : 'none';
+    document.getElementById('poundsInput').style.display = unit === 'gramsToPounds' ? 'none' : 'flex';
+  });
+
+  function convertWeight(){
+    const unit = document.getElementById('weightUnit').value;
+    const slip = document.getElementById('weightSlip');
+    const out = document.getElementById('weightResult');
+    let result;
+    if(unit === 'gramsToPounds'){
+      const grams = parseFloat(document.getElementById('weightValue').value);
+      if(isNaN(grams)){
+        out.innerHTML = '<div class="result-error">Ingresa un valor válido.</div>';
+        slip.classList.add('show');
+        return;
+      }
+      const pounds = Math.floor(grams / 453.592);
+      const ounces = ((grams % 453.592) / 28.3495).toFixed(2);
+      result = `${pounds} libras y ${ounces} onzas`;
+    } else {
+      const pounds = parseFloat(document.getElementById('pounds').value);
+      const ounces = parseFloat(document.getElementById('ounces').value);
+      if(isNaN(pounds) || isNaN(ounces)){
+        out.innerHTML = '<div class="result-error">Ingresa valores válidos.</div>';
+        slip.classList.add('show');
+        return;
+      }
+      const grams = (pounds * 453.592) + (ounces * 28.3495);
+      result = `${grams.toFixed(2)} gramos`;
+    }
+    out.innerHTML = `<div class="result-line total align-right"><span>${result}</span></div>`;
+    slip.classList.add('show');
+  }
+
+  // ---------- 04 Dosis ----------
+  function calcularDosis(){
+    const peso = parseFloat(document.getElementById('peso').value);
+    const mg = parseFloat(document.getElementById('mg').value);
+    const ml = parseFloat(document.getElementById('ml').value);
+    const posologia = parseFloat(document.getElementById('posologia').value);
+    const veces = parseFloat(document.getElementById('veces').value);
+    const slip = document.getElementById('dosisSlip');
+    const out = document.getElementById('resultadoDosis');
+
+    if(isNaN(peso) || isNaN(mg) || isNaN(ml) || isNaN(posologia) || isNaN(veces)){
+      out.innerHTML = '<div class="result-error">Completa todos los campos correctamente.</div>';
+      slip.classList.add('show');
+      return;
+    }
+    const dosisPorToma = (peso * posologia / veces) * (ml / mg);
+    const unidad = ml === 1 ? 'tableta(s)' : 'mL';
+    out.innerHTML = `<div class="result-line total"><span>Dosis por toma</span><span>${dosisPorToma.toFixed(2)} ${unidad}</span></div>`;
+    slip.classList.add('show');
+  }
+
+  // ---------- 05 Dieta embarazo ----------
+  function calcularDieta(){
+    const edad = parseFloat(document.getElementById('edadEmb').value);
+    const estatura = parseFloat(document.getElementById('estaturaEmb').value);
+    const trimestre = document.getElementById('trimestreEmb').value;
+    const slip = document.getElementById('dietaSlip');
+    const out = document.getElementById('dietaResult');
+
+    if(isNaN(edad) || isNaN(estatura) || edad <= 0 || estatura <= 0){
+      out.innerHTML = '<div class="result-error">Ingresa una edad y estatura válidas.</div>';
+      slip.classList.add('show');
+      return;
+    }
+
+    // Tabla 1: TMB kcal/kg/día según edad
+    let tmb;
+    if(edad < 14) tmb = 52;
+    else if(edad < 16) tmb = 47;
+    else if(edad < 19) tmb = 44;
+    else tmb = 38;
+
+    // Tabla 3: Peso ideal, IMC de referencia 22.9 kg/m2
+    const alturaM = estatura / 100;
+    const pesoIdeal = 22.9 * alturaM * alturaM;
+
+    // Tabla 2: adición según trimestre
+    const adiciones = {'1': 85, '2': 285, '3': 475};
+    const adicion = adiciones[trimestre];
+
+    const kcalBasal = tmb * pesoIdeal;
+    const kcalTotal = kcalBasal + adicion;
+
+    out.innerHTML = `
+      <div class="result-line"><span>Peso ideal (22.9 × talla²)</span><span>${pesoIdeal.toFixed(2)} kg</span></div>
+      <div class="result-line"><span>TMB aplicada</span><span>${tmb} kcal/kg/día</span></div>
+      <div class="result-line"><span>Gasto basal (TMB × peso ideal)</span><span>${kcalBasal.toFixed(2)} kcal/día</span></div>
+      <div class="result-line"><span>Adición trimestre ${trimestre}.º</span><span>+${adicion} kcal/día</span></div>
+      <div class="result-line total"><span>Requerimiento total</span><span>${kcalTotal.toFixed(2)} kcal/día</span></div>
+    `;
+    slip.classList.add('show');
+  }
+</script>
+</body>
+</html>

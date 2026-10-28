@@ -1,1 +1,1132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro manual de Apagones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0f12;
+    --panel:#161a1e;
+    --panel-2:#1c2126;
+    --border:#292f36;
+    --text:#eef1f3;
+    --muted:#8b939b;
+    --accent:#ec2d22;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.4;
+    padding:28px 16px 80px;
+  }
+  .app{max-width:980px;margin:0 auto;}
 
+  /* ---------- header ---------- */
+  header{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    border-bottom:1px solid var(--border);
+    padding-bottom:18px;margin-bottom:24px;flex-wrap:wrap;
+  }
+  header .brand-mark{
+    width:10px;height:34px;background:var(--accent);border-radius:2px;
+    display:inline-block;margin-right:12px;vertical-align:bottom;
+    box-shadow:0 0 14px rgba(236,45,34,.55);
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;font-size:1.5rem;letter-spacing:.2px;margin:0;
+    display:flex;align-items:center;
+  }
+  header p{color:var(--muted);font-size:.82rem;margin:4px 0 0 22px;}
+
+  .help-btn{
+    width:38px;height:38px;border-radius:50%;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;
+    background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+    display:flex;align-items:center;justify-content:center;padding:0;flex:none;
+  }
+  .help-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .cfg-btn{font-size:1.05rem;}
+  .header-actions{display:flex;gap:10px;align-items:center;}
+
+  /* ---------- help modal ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;z-index:100;
+  }
+  .modal-overlay[hidden]{display:none;}
+  .modal-box{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    max-width:520px;width:100%;max-height:80vh;display:flex;flex-direction:column;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  .modal-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 20px;border-bottom:1px solid var(--border);flex:none;
+  }
+  .modal-head h2{
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.05rem;margin:0;
+  }
+  .modal-close{
+    width:30px;height:30px;border-radius:6px;padding:0;
+    background:transparent;border:1px solid var(--border);color:var(--muted);
+  }
+  .modal-close:hover{border-color:var(--accent);color:var(--accent);}
+  .modal-body{
+    padding:18px 20px 22px;overflow-y:auto;font-size:.9rem;color:var(--text);
+  }
+  .modal-body h3{font-family:'Space Grotesk',sans-serif;font-size:.95rem;margin:16px 0 6px;}
+  .modal-body h3:first-child{margin-top:0;}
+  .modal-body p{margin:0 0 10px;color:#d7dade;}
+  .modal-body ul{margin:0 0 10px;padding-left:20px;color:#d7dade;}
+  .modal-body li{margin-bottom:4px;}
+  .modal-body strong{color:var(--text);}
+
+  /* ---------- cfg (opciones de apagón) ---------- */
+  .cat-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #202529;}
+  .cat-swatch{width:14px;height:14px;border-radius:3px;flex:none;}
+  .cat-name{flex:1;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.9rem;min-width:0;overflow-wrap:anywhere;}
+  .cat-use{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted);white-space:nowrap;}
+  .cat-actions{display:flex;gap:6px;flex:none;}
+  .cat-actions button{padding:4px 8px;font-size:.85rem;line-height:1.2;}
+  .cat-actions button[aria-disabled="true"]{opacity:.35;cursor:not-allowed;}
+  .cat-edit input[type="text"]{
+    flex:1;min-width:0;background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+    padding:7px 10px;border-radius:6px;font-family:'Inter',sans-serif;font-size:.88rem;
+  }
+  .cat-edit input[type="text"]:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .cat-edit input[type="color"]{
+    width:38px;height:32px;padding:2px;flex:none;cursor:pointer;
+    background:var(--panel-2);border:1px solid var(--border);border-radius:6px;
+  }
+  .cat-add{margin-top:12px;}
+  .cat-notice{margin:10px 0 0;font-size:.8rem;color:var(--accent);min-height:1em;}
+  .modal-body h3.cfg-h{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:18px 0 2px;}
+  .modal-body h3.cfg-h:first-child{margin-top:0;}
+
+  /* ---------- panels ---------- */
+  section.panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;margin-bottom:18px;
+  }
+  .panel-title{
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.72rem;
+    letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);
+    margin:0 0 14px 0;
+  }
+
+  /* ---------- status panel ---------- */
+  #statusPanel{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .status-dot{width:14px;height:14px;border-radius:50%;flex:none;}
+  .status-text{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.15rem;}
+  .status-sub{color:var(--muted);font-size:.82rem;font-family:'IBM Plex Mono',monospace;}
+  .status-timer{
+    margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:1.4rem;
+    padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--panel-2);
+  }
+
+  /* ---------- breaker switches ---------- */
+  .breakers{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+  .breaker{
+    flex:1;min-width:150px;
+    background:var(--panel-2);border:1px solid var(--border);border-radius:8px;
+    padding:12px 14px;cursor:pointer;user-select:none;
+    display:flex;align-items:center;gap:10px;
+    transition:border-color .15s, background .15s;
+  }
+  .breaker:hover{border-color:#3a4149;}
+  .breaker .num{
+    font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted);
+    border:1px solid var(--border);border-radius:4px;padding:1px 5px;
+  }
+  .breaker .label{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.92rem;}
+  .breaker .switch{
+    margin-left:auto;width:30px;height:16px;border-radius:9px;background:#0c0f12;
+    border:1px solid var(--border);position:relative;flex:none;
+  }
+  .breaker .switch::after{
+    content:'';position:absolute;top:1px;left:1px;width:12px;height:12px;border-radius:50%;
+    background:#4a525b;transition:transform .15s, background .15s;
+  }
+  .breaker.active{background:#20262c;}
+  .breaker.active .switch::after{transform:translateX(14px);}
+  .breaker.active{border-color:var(--c,var(--border));}
+  .breaker.active .switch::after{background:var(--c,#4a525b);box-shadow:0 0 8px var(--c,transparent);}
+
+  .entry-row{display:flex;gap:12px;flex-wrap:wrap;align-items:end;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+  input[type="date"],input[type="time"]{
+    background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+    padding:8px 10px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:.88rem;
+  }
+  input[type="date"]:focus,input[type="time"]:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  button{
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.85rem;
+    border-radius:6px;border:1px solid var(--border);padding:9px 16px;cursor:pointer;
+    background:var(--panel-2);color:var(--text);transition:border-color .15s, background .15s;
+  }
+  button:hover{border-color:#4a525b;}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#d5271d;}
+
+  /* ---------- filters ---------- */
+  .filter-row{display:flex;gap:12px;flex-wrap:wrap;align-items:end;justify-content:space-between;}
+  .filter-left{display:flex;gap:12px;flex-wrap:wrap;align-items:end;}
+  .presets{display:flex;gap:6px;flex-wrap:wrap;}
+  .presets button{padding:6px 11px;font-size:.72rem;}
+  .filter-right{display:flex;gap:10px;flex-wrap:wrap;}
+
+  /* ---------- legend ---------- */
+  .legend{display:flex;gap:18px;margin-bottom:14px;flex-wrap:wrap;}
+  .legend span{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+  .legend i{width:10px;height:10px;border-radius:2px;display:inline-block;}
+
+  /* ---------- chart ---------- */
+  .empty-note{color:var(--muted);font-size:.85rem;font-family:'IBM Plex Mono',monospace;padding:10px 0;}
+
+  /* ---------- gantt chart (fecha fija a la izq., horas fijas arriba) ---------- */
+  .gantt{
+    display:grid;
+    grid-template-columns:92px minmax(560px,1fr);
+    grid-template-rows:32px;
+    grid-auto-rows:30px;
+    overflow:auto;
+    max-height:440px;
+    border:1px solid var(--border);
+    border-radius:8px;
+  }
+  .gantt-corner{
+    position:sticky;top:0;left:0;z-index:3;
+    background:var(--panel-2);
+    border-bottom:1px solid var(--border);
+    border-right:1px solid var(--border);
+  }
+  .gantt-hours{
+    position:sticky;top:0;z-index:2;
+    background:var(--panel-2);
+    border-bottom:1px solid var(--border);
+  }
+  .gantt-hours .hh{
+    position:absolute;top:50%;transform:translate(-50%,-50%);
+    font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);
+    white-space:nowrap;
+  }
+  .gantt-hours .hh.first{transform:translate(0,-50%);}
+  .gantt-hours .hh.last{transform:translate(-100%,-50%);}
+  .gantt-rowlabel{
+    position:sticky;left:0;z-index:1;
+    background:var(--panel-2);
+    border-right:1px solid var(--border);
+    border-bottom:1px solid #202529;
+    display:flex;align-items:center;
+    padding-left:10px;
+    font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);
+    white-space:nowrap;
+  }
+  .gantt-track{
+    position:relative;
+    border-bottom:1px solid #202529;
+    background-image:repeating-linear-gradient(to right, var(--border) 0, var(--border) 1px, transparent 1px, transparent 12.5%);
+  }
+  .gantt-bar{
+    position:absolute;top:4px;bottom:4px;border-radius:2px;
+    min-width:2px;
+  }
+
+  /* ---------- table ---------- */
+  table{width:100%;border-collapse:collapse;font-size:.84rem;}
+  thead th{
+    text-align:left;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.7rem;
+    text-transform:uppercase;letter-spacing:.6px;color:var(--muted);
+    border-bottom:1px solid var(--border);padding:8px 10px;
+  }
+  tbody td{padding:9px 10px;border-bottom:1px solid #202529;font-family:'IBM Plex Mono',monospace;vertical-align:middle;}
+  tbody tr:hover{background:var(--panel-2);}
+  .badge{
+    display:inline-block;padding:2px 9px;border-radius:20px;font-size:.72rem;
+    font-family:'Space Grotesk',sans-serif;font-weight:600;
+  }
+  .row-actions{display:flex;gap:6px;}
+  .row-actions button{padding:4px 9px;font-size:.72rem;}
+  .btn-danger{color:var(--accent);}
+  table input{width:100%;}
+
+  footer.toolbar{
+    display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px;
+  }
+
+  /* ---------- toast (aviso de registro) ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translate(-50%,16px);
+    display:flex;align-items:center;gap:10px;
+    background:var(--panel-2);border:1px solid var(--accent);color:var(--text);
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.85rem;
+    padding:11px 18px;border-radius:8px;
+    box-shadow:0 10px 30px rgba(0,0,0,.45);
+    opacity:0;pointer-events:none;
+    transition:opacity .22s ease, transform .22s ease;
+    z-index:200;max-width:calc(100vw - 32px);
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0);}
+  .toast .dot{width:10px;height:10px;border-radius:50%;flex:none;}
+
+  /* ---------- print ---------- */
+  @media print{
+    body{background:#fff;color:#000;padding:0;}
+    header p, .breakers, .entry-row, .filter-row, footer.toolbar, #entryPanel, #filterControls, .help-btn, .modal-overlay, #importFile{display:none !important;}
+    section.panel{border:none;background:#fff;padding:0;margin-bottom:20px;}
+    .panel-title{color:#000;}
+.gantt{max-height:none;overflow:visible;border-color:#ccc;} .gantt-bar,.badge,.legend i{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .badge{color:#000 !important;}
+    .gantt-corner,.gantt-hours,.gantt-rowlabel{position:static;background:#fff;}
+    .gantt-hours .hh{color:#000;}
+    .gantt-rowlabel{color:#000;border-right:1px solid #ccc;}
+    .gantt-track{background-image:repeating-linear-gradient(to right, #ccc 0, #ccc 1px, transparent 1px, transparent 12.5%);}
+    thead th{color:#000;border-bottom:1px solid #000;}
+    tbody td{color:#000;border-bottom:1px solid #ddd;}
+    .status-timer{display:none;}
+    .toast{display:none !important;}
+  }
+  @media (max-width:640px){
+    .status-timer{margin-left:0;}
+    table{font-size:.74rem;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div>
+      <h1><span class="brand-mark"></span>Registro manual de Apagones</h1>
+      <p>Historial continuo por franjas horarias</p>
+    </div>
+    <div class="header-actions">
+      <button id="cfgBtn" class="help-btn cfg-btn" aria-haspopup="dialog" aria-controls="cfgModal" title="Opciones de apagón">⚙️</button>
+      <button id="helpBtn" class="help-btn" aria-haspopup="dialog" aria-controls="helpModal" title="Ayuda">?</button>
+    </div>
+  </header>
+
+  <div id="helpModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="helpTitle" hidden>
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2 id="helpTitle">Acerca de</h2>
+        <button id="helpClose" class="modal-close" aria-label="Cerrar ayuda">✕</button>
+      </div>
+      <div class="modal-body">
+      <p class="config-desc">Herramienta desarrolladacon con asistencia de IA por: <a href="http://t.me/gigapepe2000">Ing.Giuseppe</a><br><a href="mailto:gigapepe2000@gmail.com">gigapepe2000@gmail.com</a></p>  <!-- ============================================================
+             ============================================================ -->
+      </div>
+    </div>
+  </div>
+
+  <div id="cfgModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cfgTitle" hidden>
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2 id="cfgTitle">Opciones de apagón</h2>
+        <button id="cfgClose" class="modal-close" aria-label="Cerrar opciones">✕</button>
+      </div>
+      <div class="modal-body" id="cfgBody"></div>
+    </div>
+  </div>
+
+  <section class="panel" id="statusPanel">
+    <div class="status-dot" id="statusDot"></div>
+    <div>
+      <div class="status-text" id="statusText">—</div>
+      <div class="status-sub" id="statusSub">Sin registros aún</div>
+    </div>
+    <div class="status-timer" id="statusTimer">00:00:00</div>
+  </section>
+
+  <section class="panel" id="entryPanel">
+    <p class="panel-title">Nueva franja — el inicio cierra la anterior</p>
+    <div class="breakers" id="breakers"></div>
+    <div class="entry-row">
+      <div class="field">
+        <label for="entryDate">Fecha de inicio</label>
+        <input type="date" id="entryDate">
+      </div>
+      <div class="field">
+        <label for="entryTime">Hora de inicio</label>
+        <input type="time" id="entryTime" step="60">
+      </div>
+      <button class="btn-primary" id="addEventBtn">Registrar cambio</button>
+    </div>
+  </section>
+
+  <section class="panel" id="filterControls">
+    <p class="panel-title">Período a visualizar</p>
+    <div class="filter-row">
+      <div class="filter-left">
+        <div class="field">
+          <label for="fromDate">Desde</label>
+          <input type="date" id="fromDate">
+        </div>
+        <div class="field">
+          <label for="toDate">Hasta</label>
+          <input type="date" id="toDate">
+        </div>
+        <div class="presets">
+          <button data-preset="hoy">Hoy</button>
+          <button data-preset="7">7 días</button>
+          <button data-preset="30">30 días</button>
+          <button data-preset="todo">Todo</button>
+        </div>
+      </div>
+      <div class="filter-right">
+        <button id="printBtn">🖨 Imprimir</button>
+        <button id="importBtn">⭱ Importar CSV</button>
+        <button id="exportBtn">⭳ Exportar CSV</button>
+        <input type="file" id="importFile" accept=".csv,text/csv" hidden>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <p class="panel-title">Línea de tiempo</p>
+    <div class="legend" id="legend"></div>
+    <div id="chartWrap"></div>
+  </section>
+
+  <section class="panel">
+    <p class="panel-title">Detalle de registros</p>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha inicio</th><th>Hora inicio</th><th>Fecha fin</th><th>Hora fin</th>
+            <th>Categoría</th><th>Duración</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <footer class="toolbar">
+      <button id="printBtn2">🖨 Imprimir</button>
+      <button id="importBtn2">⭱ Importar CSV</button>
+      <button id="exportBtn2">⭳ Exportar CSV</button>
+    </footer>
+  </section>
+
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  const STORAGE_KEY = "circuito_events_v1";
+  const CATS_KEY = "circuito_cats_v1";
+
+  // Los ids internos "apagon", "corriente" y "daf" se conservan para que los
+  // registros guardados con versiones anteriores sigan funcionando.
+  // "apagon" ahora se muestra como "Apagón por Déficit".
+  const DEFAULT_CATS = [
+    {id:"corriente",            label:"Corriente",               color:"#f2c230", group:"corriente"},
+    {id:"apagon",               label:"Apagón por Déficit",                 color:"#565d66", group:"apagon"},
+    {id:"averia_acometida",     label:"Avería en acometida",     color:"#e8742a", group:"apagon"},
+    {id:"averia_transformador", label:"Avería en transformador", color:"#b5382f", group:"apagon"},
+    {id:"disparo",              label:"Disparo",                 color:"#3f8fd2", group:"apagon"},
+    {id:"daf",                  label:"DAF",                     color:"#a9b0b6", group:"apagon"}
+  ];
+  const EXTRA_COLORS = ["#8e6bd0","#2fa58a","#d6568f","#9aa84a","#c9a227","#5b7fa8","#d98c5f","#6aa84f"];
+  let cats = [];
+
+  let events = [];        // {id, category, start:"YYYY-MM-DDTHH:mm:00", end:"..."|null}
+  let selectedCat = "apagon";
+  let editingId = null;
+
+  // ---------- date helpers (all local time, no UTC conversion) ----------
+  const pad = n => String(n).padStart(2,"0");
+
+  function toLocalString(d){
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+  function parseLocal(s){ return new Date(s); } // "YYYY-MM-DDTHH:mm:ss" (no Z) parses as local time
+  function dateKeyLocal(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+  function todayStr(){ return dateKeyLocal(new Date()); }
+  function nowTimeStr(){ const d=new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+  function combine(dateStr, timeStr){ return `${dateStr}T${timeStr}:00`; }
+  function hoursOf(d){ return d.getHours() + d.getMinutes()/60 + d.getSeconds()/3600; }
+  function esc(t){
+    return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  }
+  function lighten(hex, amt){
+    const m = /^#([0-9a-f]{6})$/i.exec(hex);
+    if(!m) return "#e6e9ec";
+    const n = parseInt(m[1],16);
+    const ch = v => Math.round(v + (255 - v) * amt);
+    const r = ch((n>>16)&255), g = ch((n>>8)&255), b = ch(n&255);
+    return "#" + [r,g,b].map(v => v.toString(16).padStart(2,"0")).join("");
+  }
+  function badgeStyle(color){
+    return `background:${color}38;color:${lighten(color,.55)}`;
+  }
+
+  function fmtDuration(ms){
+    if(ms < 0) ms = 0;
+    const totalMin = Math.round(ms/60000);
+    const h = Math.floor(totalMin/60);
+    const m = totalMin % 60;
+    return `${h}h ${pad(m)}m`;
+  }
+  function fmtClock(ms){
+    const s = Math.floor(ms/1000);
+    const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+    return `${pad(h)}:${pad(m)}:${pad(sec)}`;
+  }
+
+  // ---------- storage ----------
+  function loadEvents(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      events = raw ? JSON.parse(raw) : [];
+    }catch(e){ events = []; }
+  }
+  function saveEvents(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+  }
+
+  // ---------- categorías ----------
+  function catOf(id){
+    return cats.find(c => c.id === id) || {id, label:String(id), color:"#777f88", group:"apagon"};
+  }
+  function usageCount(id){ return events.filter(e => e.category === id).length; }
+  function nextColor(){
+    const used = new Set(cats.map(c => c.color.toLowerCase()));
+    const free = EXTRA_COLORS.find(c => !used.has(c));
+    if(free) return free;
+    const h = (cats.length * 47) % 360;
+    const hsl2hex = (h,s,l) => {
+      s/=100; l/=100;
+      const k = n => (n + h/30) % 12, a = s*Math.min(l,1-l);
+      const f = n => l - a*Math.max(-1, Math.min(k(n)-3, Math.min(9-k(n),1)));
+      return "#" + [f(0),f(8),f(4)].map(v => Math.round(v*255).toString(16).padStart(2,"0")).join("");
+    };
+    return hsl2hex(h,55,55);
+  }
+  function newCatId(){ return "c_" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+  function loadCats(){
+    try{
+      const arr = JSON.parse(localStorage.getItem(CATS_KEY) || "null");
+      const ok = Array.isArray(arr) && arr.length && arr.every(c => c && c.id && c.label && c.color && c.group);
+      cats = ok ? arr : DEFAULT_CATS.map(c => ({...c}));
+    }catch(e){ cats = DEFAULT_CATS.map(c => ({...c})); }
+    if(!cats.some(c => c.group === "corriente")) cats.unshift({...DEFAULT_CATS[0]});
+    if(!cats.some(c => c.group === "apagon")) cats.push({...DEFAULT_CATS[1]});
+    // seguridad: eventos con una categoría que no existe en la lista
+    const known = new Set(cats.map(c => c.id));
+    events.forEach(ev => {
+      if(!known.has(ev.category)){
+        cats.push({id:ev.category, label:String(ev.category), color:nextColor(), group:"apagon"});
+        known.add(ev.category);
+      }
+    });
+  }
+  function saveCats(){
+    try{ localStorage.setItem(CATS_KEY, JSON.stringify(cats)); }catch(e){}
+  }
+
+  function renderBreakers(){
+    const box = document.getElementById("breakers");
+    if(!cats.some(c => c.id === selectedCat)){
+      selectedCat = (cats.find(c => c.group === "apagon") || cats[0]).id;
+    }
+    box.innerHTML = cats.map((c,i) =>
+      `<div class="breaker${c.id===selectedCat?" active":""}" data-cat="${esc(c.id)}" style="--c:${esc(c.color)}">` +
+      `<span class="num">${pad(i+1)}</span><span class="label">${esc(c.label)}</span><span class="switch"></span></div>`
+    ).join("");
+    box.querySelectorAll(".breaker").forEach(b => b.addEventListener("click", () => {
+      selectedCat = b.getAttribute("data-cat");
+      box.querySelectorAll(".breaker").forEach(x => x.classList.toggle("active", x === b));
+    }));
+  }
+
+  function renderLegend(){
+    document.getElementById("legend").innerHTML = cats.map(c =>
+      `<span><i style="background:${esc(c.color)}"></i>${esc(c.label)}</span>`
+    ).join("");
+  }
+
+  // El último evento se deja "en curso" (end: null) entre sesiones; no se cierra
+  // automáticamente al reabrir el navegador. Solo se cierra al registrar el
+  // siguiente cambio o al editarlo manualmente.
+  function closeStaleOpenEvent(){
+    // Intencionalmente vacío — ver comentario arriba.
+  }
+
+  // ---------- toast (aviso de registro) ----------
+  let toastTimer = null;
+  function showToast(category, startISO){
+    const toast = document.getElementById("toast");
+    const cat = catOf(category);
+    const d = parseLocal(startISO);
+    toast.innerHTML = `<span class="dot" style="background:${esc(cat.color)}"></span>Registrado: ${esc(cat.label)} desde las ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
+  }
+
+  // ---------- core actions ----------
+  // El "fin" de cada evento nunca se edita a mano: siempre es el inicio del
+  // evento cronológicamente siguiente (o null si es el último = "en curso").
+  function relinkEvents(){
+    events.sort((a,b) => parseLocal(a.start) - parseLocal(b.start));
+    for(let i=0; i<events.length; i++){
+      events[i].end = (i < events.length-1) ? events[i+1].start : null;
+    }
+  }
+
+  function addEvent(category, dateStr, timeStr){
+    if(!dateStr || !timeStr){ alert("Completa fecha y hora."); return; }
+    const startISO = combine(dateStr, timeStr);
+    if(events.length){
+      const last = events[events.length-1];
+      if(parseLocal(startISO) <= parseLocal(last.start)){
+        if(!confirm("La hora ingresada es igual o anterior al último registro. ¿Continuar de todas formas?")) return;
+      }
+    }
+    events.push({ id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())), category, start: startISO, end: null });
+    relinkEvents();
+    saveEvents();
+    renderAll();
+    showToast(category, startISO);
+  }
+
+  function deleteEvent(id){
+    if(!confirm("¿Eliminar este registro?")) return;
+    events = events.filter(e => e.id !== id);
+    relinkEvents();
+    saveEvents();
+    renderAll();
+  }
+
+  function updateEvent(id, category, startISO){
+    const ev = events.find(e => e.id === id);
+    if(!ev) return;
+    ev.category = category;
+    ev.start = startISO;
+    relinkEvents();
+    saveEvents();
+    editingId = null;
+    renderAll();
+  }
+
+  // ---------- splitting events across midnight ----------
+  function segmentsFor(ev){
+    const segs = [];
+    let curStart = parseLocal(ev.start);
+    const end = ev.end ? parseLocal(ev.end) : new Date();
+    while(curStart < end){
+      const dayEnd = new Date(curStart.getFullYear(), curStart.getMonth(), curStart.getDate()+1, 0,0,0);
+      const segEnd = dayEnd < end ? dayEnd : end;
+      segs.push({ date: dateKeyLocal(curStart), start: curStart, end: segEnd, category: ev.category, eventId: ev.id });
+      curStart = segEnd;
+    }
+    return segs;
+  }
+
+  function allSegments(){
+    let out = [];
+    events.forEach(ev => { out = out.concat(segmentsFor(ev)); });
+    return out;
+  }
+
+  // ---------- status panel ----------
+  let timerInterval = null;
+  function updateStatusPanel(){
+    const dot = document.getElementById("statusDot");
+    const text = document.getElementById("statusText");
+    const sub = document.getElementById("statusSub");
+    const timer = document.getElementById("statusTimer");
+    if(!events.length){
+      dot.style.background = "#3a4149";
+      text.textContent = "Sin registros";
+      sub.textContent = "Registra la primera franja para comenzar";
+      timer.textContent = "00:00:00";
+      return;
+    }
+    const last = events[events.length-1];
+    const cat = catOf(last.category);
+    dot.style.background = cat.color;
+    dot.style.boxShadow = `0 0 10px ${cat.color}`;
+    if(last.end === null){
+      text.textContent = cat.label + " (en curso)";
+      const startDate = parseLocal(last.start);
+      sub.textContent = "Desde " + startDate.toLocaleString("es-ES");
+      timer.textContent = fmtClock(Date.now() - startDate.getTime());
+    } else {
+      text.textContent = cat.label + " (finalizado)";
+      sub.textContent = "Hasta " + parseLocal(last.end).toLocaleString("es-ES");
+      timer.textContent = fmtDuration(parseLocal(last.end) - parseLocal(last.start));
+    }
+  }
+
+  // ---------- filters ----------
+  function getFilterRange(){
+    const from = document.getElementById("fromDate").value || null;
+    const to = document.getElementById("toDate").value || null;
+    return { from, to };
+  }
+
+  function applyPreset(preset){
+    const today = todayStr();
+    const fromEl = document.getElementById("fromDate");
+    const toEl = document.getElementById("toDate");
+    if(preset === "hoy"){ fromEl.value = today; toEl.value = today; }
+    else if(preset === "7"){
+      const d = new Date(); d.setDate(d.getDate()-6);
+      fromEl.value = dateKeyLocal(d); toEl.value = today;
+    } else if(preset === "30"){
+      const d = new Date(); d.setDate(d.getDate()-29);
+      fromEl.value = dateKeyLocal(d); toEl.value = today;
+    } else if(preset === "todo"){
+      fromEl.value = ""; toEl.value = "";
+    }
+    renderChart();
+    renderTable();
+  }
+
+  // ---------- chart (Gantt-style timeline) ----------
+  function renderChart(){
+    const wrap = document.getElementById("chartWrap");
+    const { from, to } = getFilterRange();
+    const segs = allSegments().filter(s => (!from || s.date >= from) && (!to || s.date <= to));
+
+    if(!segs.length){
+      wrap.innerHTML = '<p class="empty-note">No hay datos en el período seleccionado.</p>';
+      return;
+    }
+
+    let dates = Array.from(new Set(segs.map(s => s.date))).sort();
+    if(from || to){
+      // fill in the full requested range so empty days still show as rows
+      const start = from ? new Date(from+"T00:00:00") : parseLocal(dates[0]+"T00:00:00");
+      const end = to ? new Date(to+"T00:00:00") : parseLocal(dates[dates.length-1]+"T00:00:00");
+      dates = [];
+      for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)){
+        dates.push(dateKeyLocal(d));
+      }
+    }
+    dates.reverse(); // más reciente arriba, igual que la tabla
+
+    let html = `<div class="gantt">`;
+    html += `<div class="gantt-corner"></div>`;
+    html += `<div class="gantt-hours">`;
+    for(let h=0; h<=24; h+=3){
+      const pct = (h/24)*100;
+      const cls = h===0 ? "hh first" : (h===24 ? "hh last" : "hh");
+      html += `<span class="${cls}" style="left:${pct}%">${pad(h)}h</span>`;
+    }
+    html += `</div>`;
+
+    dates.forEach(date => {
+      const label = new Date(date+"T00:00:00").toLocaleDateString("es-ES", {day:"2-digit", month:"short"});
+      html += `<div class="gantt-rowlabel">${label}</div>`;
+      html += `<div class="gantt-track">`;
+      segs.filter(s => s.date === date).forEach(s => {
+        const sameDayEnd = dateKeyLocal(s.end) === s.date;
+        const startH = hoursOf(s.start);
+        const endH = sameDayEnd ? hoursOf(s.end) : 24;
+        const leftPct = (startH/24)*100;
+        const widthPct = Math.max(0.3, ((endH-startH)/24)*100);
+        const sc = catOf(s.category);
+        html += `<div class="gantt-bar" style="left:${leftPct.toFixed(2)}%;width:${widthPct.toFixed(2)}%;background:${esc(sc.color)}" title="${esc(sc.label)}: ${pad(s.start.getHours())}:${pad(s.start.getMinutes())}–${sameDayEnd?pad(s.end.getHours())+':'+pad(s.end.getMinutes()):'24:00'}"></div>`;
+      });
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+    wrap.innerHTML = html;
+  }
+
+  // ---------- table ----------
+  function eventOverlapsRange(ev, from, to){
+    const startDate = ev.start.slice(0,10);
+    const endDate = (ev.end || toLocalString(new Date())).slice(0,10);
+    if(to && startDate > to) return false;
+    if(from && endDate < from) return false;
+    return true;
+  }
+
+  function renderTable(){
+    const body = document.getElementById("tableBody");
+    const { from, to } = getFilterRange();
+    const filtered = events.filter(ev => eventOverlapsRange(ev, from, to))
+                            .slice().reverse();
+
+    if(!filtered.length){
+      body.innerHTML = `<tr><td colspan="7" class="empty-note">No hay registros en este período.</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = filtered.map(ev => {
+      const startD = parseLocal(ev.start);
+      const endD = ev.end ? parseLocal(ev.end) : null;
+      const durMs = (endD || new Date()) - startD;
+
+      if(editingId === ev.id){
+        const startDateVal = ev.start.slice(0,10), startTimeVal = ev.start.slice(11,16);
+        const opts = list => list.map(c => `<option value="${esc(c.id)}"${c.id===ev.category?" selected":""}>${esc(c.label)}</option>`).join("");
+        const options = `<optgroup label="Corriente">${opts(cats.filter(c => c.group==="corriente"))}</optgroup>` +
+                        `<optgroup label="Apagón">${opts(cats.filter(c => c.group==="apagon"))}</optgroup>`;
+        return `<tr>
+          <td><input type="date" id="editStartDate"></td>
+          <td><input type="time" id="editStartTime"></td>
+          <td colspan="2" style="color:var(--muted);font-size:.75rem;font-style:italic;">Se ajusta solo (= inicio del siguiente)</td>
+          <td><select id="editCat" style="background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px;">${options}</select></td>
+          <td colspan="1">—</td>
+          <td class="row-actions">
+            <button data-save="${ev.id}">Guardar</button>
+            <button data-cancel="1">Cancelar</button>
+          </td>
+        </tr>`;
+      }
+
+      return `<tr>
+        <td>${startD.toLocaleDateString("es-ES")}</td>
+        <td>${pad(startD.getHours())}:${pad(startD.getMinutes())}</td>
+        <td>${endD ? endD.toLocaleDateString("es-ES") : "—"}</td>
+        <td>${endD ? pad(endD.getHours())+":"+pad(endD.getMinutes()) : "en curso"}</td>
+        <td><span class="badge" style="${badgeStyle(catOf(ev.category).color)}">${esc(catOf(ev.category).label)}</span></td>
+        <td>${fmtDuration(durMs)}</td>
+        <td class="row-actions">
+          <button data-edit="${ev.id}">Editar</button>
+          <button class="btn-danger" data-del="${ev.id}">Eliminar</button>
+        </td>
+      </tr>`;
+    }).join("");
+
+    // wire up buttons
+    body.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => {
+      editingId = b.getAttribute("data-edit");
+      renderTable();
+      const ev = events.find(e => e.id === editingId);
+      document.getElementById("editStartDate").value = ev.start.slice(0,10);
+      document.getElementById("editStartTime").value = ev.start.slice(11,16);
+    }));
+    body.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => deleteEvent(b.getAttribute("data-del"))));
+    body.querySelectorAll("[data-cancel]").forEach(b => b.addEventListener("click", () => { editingId = null; renderTable(); }));
+    body.querySelectorAll("[data-save]").forEach(b => b.addEventListener("click", () => {
+      const id = b.getAttribute("data-save");
+      const cat = document.getElementById("editCat").value;
+      const sd = document.getElementById("editStartDate").value;
+      const st = document.getElementById("editStartTime").value;
+      if(!sd || !st){ alert("Falta la fecha/hora de inicio."); return; }
+      const startISO = combine(sd, st);
+      updateEvent(id, cat, startISO);
+    }));
+  }
+
+  // ---------- CSV export ----------
+  function exportCSV(){
+    const rows = [["id","categoria","inicio","fin","duracion_horas"]];
+    events.forEach(ev => {
+      const durH = ((ev.end ? parseLocal(ev.end) : new Date()) - parseLocal(ev.start)) / 3600000;
+      rows.push([ev.id, catOf(ev.category).label, ev.start, ev.end || "", durH.toFixed(2)]);
+    });
+    const csv = rows.map(r => r.map(f => `"${String(f).replace(/"/g,'""')}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `registro_circuito_${todayStr()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // ---------- CSV import ----------
+  function parseCSV(text){
+    text = text.replace(/^\uFEFF/, "");
+    const rows = [];
+    let row = [], field = "", inQuotes = false;
+    for(let i=0; i<text.length; i++){
+      const c = text[i];
+      if(inQuotes){
+        if(c === '"'){
+          if(text[i+1] === '"'){ field += '"'; i++; }
+          else inQuotes = false;
+        } else field += c;
+      } else {
+        if(c === '"') inQuotes = true;
+        else if(c === ","){ row.push(field); field = ""; }
+        else if(c === "\r"){ /* ignorar */ }
+        else if(c === "\n"){ row.push(field); rows.push(row); row = []; field = ""; }
+        else field += c;
+      }
+    }
+    if(field.length || row.length){ row.push(field); rows.push(row); }
+    return rows.filter(r => !(r.length === 1 && r[0] === ""));
+  }
+
+  // Convierte el nombre de categoría del CSV en un id interno.
+  // Los nombres antiguos ("Apagón") se asignan a Apagón por Déficit; un nombre desconocido
+  // crea un tipo de apagón nuevo para no perder información.
+  const LEGACY_ALIASES = {"apagón":"apagon","apagon":"apagon","déficit":"apagon","deficit":"apagon","corriente":"corriente","daf":"daf"};
+  function resolveCategory(label, created){
+    const raw = String(label).trim();
+    const key = raw.toLowerCase();
+    if(!key) return null;
+    const byLabel = cats.find(c => c.label.toLowerCase() === key);
+    if(byLabel) return byLabel.id;
+    const aliasId = LEGACY_ALIASES[key];
+    if(aliasId && cats.some(c => c.id === aliasId)) return aliasId;
+    const nc = {id:newCatId(), label:raw, color:nextColor(), group:"apagon"};
+    cats.push(nc);
+    created.push(nc.label);
+    return nc.id;
+  }
+
+  function rowsToEvents(rows, created){
+    const dataRows = rows.slice(1); // saltar encabezado
+    const parsed = [];
+    dataRows.forEach(r => {
+      if(r.length < 3) return;
+      const [id, catRaw, start, end] = r;
+      if(!start || !start.trim()) return;
+      const catKey = resolveCategory(catRaw, created);
+      if(!catKey) return;
+      parsed.push({
+        id: id && id.trim() ? id.trim() : (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random())),
+        category: catKey,
+        start: start.trim(),
+        end: end && end.trim() ? end.trim() : null
+      });
+    });
+    return parsed;
+  }
+
+  function importCSVFile(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      let parsed;
+      const created = [];
+      try{
+        parsed = rowsToEvents(parseCSV(String(reader.result)), created);
+      }catch(err){
+        alert("No se pudo leer el archivo. Verifica que sea un CSV exportado desde esta app.");
+        return;
+      }
+      if(!parsed.length){
+        alert("No se encontraron registros válidos en el archivo.");
+        return;
+      }
+      const replace = confirm(
+        `Se encontraron ${parsed.length} registro(s) en el archivo.\n\n` +
+        `Aceptar → reemplazar todos los datos actuales.\n` +
+        `Cancelar → agregarlos a los ya existentes (sin duplicar por id).`
+      );
+      if(replace){
+        events = parsed;
+      } else {
+        const existingIds = new Set(events.map(ev => ev.id));
+        parsed.forEach(p => { if(!existingIds.has(p.id)) events.push(p); });
+      }
+      relinkEvents();
+      saveEvents();
+      if(created.length){ saveCats(); renderBreakers(); renderLegend(); }
+      editingId = null;
+      renderAll();
+      alert(`Importación completa: ${parsed.length} registro(s) procesados.` +
+        (created.length ? `\n\nSe crearon ${created.length} tipo(s) de apagón nuevos: ${created.join(", ")}.` : ""));
+    };
+    reader.onerror = () => alert("No se pudo leer el archivo.");
+    reader.readAsText(file, "utf-8");
+  }
+
+  // ---------- render orchestration ----------
+  function renderAll(){
+    updateStatusPanel();
+    renderChart();
+    renderTable();
+  }
+
+  // ---------- wire up static controls ----------
+  // ---------- ventana de opciones de apagón (⚙️) ----------
+  let cfgEditingId = null;   // id de la categoría en edición, o "__new__"
+  let cfgNotice = "";
+
+  function cfgRowHTML(c){
+    if(cfgEditingId === c.id) return cfgEditHTML(c.id, c.label, c.color);
+    const n = usageCount(c.id);
+    const isCor = c.group === "corriente";
+    const lastApagon = c.group === "apagon" && cats.filter(x => x.group === "apagon").length === 1;
+    const blocked = isCor || n > 0 || lastApagon;
+    const why = isCor ? "Corriente es la categoría base y no se puede eliminar"
+              : n > 0 ? `En uso por ${n} registro(s)`
+              : lastApagon ? "Debe existir al menos un tipo de apagón"
+              : "Eliminar";
+    return `<div class="cat-row">` +
+      `<span class="cat-swatch" style="background:${esc(c.color)}"></span>` +
+      `<span class="cat-name">${esc(c.label)}</span>` +
+      `<span class="cat-use">${n} reg.</span>` +
+      `<span class="cat-actions">` +
+        `<button type="button" data-cfg-edit="${esc(c.id)}" title="Editar" aria-label="Editar ${esc(c.label)}">✏️</button>` +
+        `<button type="button" data-cfg-del="${esc(c.id)}" title="${esc(why)}" aria-label="Eliminar ${esc(c.label)}" aria-disabled="${blocked}">🗑️</button>` +
+      `</span></div>`;
+  }
+
+  function cfgEditHTML(id, label, color){
+    return `<div class="cat-row cat-edit">` +
+      `<input type="color" id="cfgColor" value="${esc(color)}" aria-label="Color">` +
+      `<input type="text" id="cfgName" value="${esc(label)}" maxlength="30" placeholder="Nombre" aria-label="Nombre">` +
+      `<span class="cat-actions">` +
+        `<button type="button" data-cfg-save="${esc(id)}" title="Guardar" aria-label="Guardar">✔️</button>` +
+        `<button type="button" data-cfg-cancel="1" title="Cancelar" aria-label="Cancelar">✖️</button>` +
+      `</span></div>`;
+  }
+
+  function renderCfg(){
+    const body = document.getElementById("cfgBody");
+    const cor = cats.filter(c => c.group === "corriente");
+    const apa = cats.filter(c => c.group === "apagon");
+    let html = `<h3 class="cfg-h">Corriente</h3>` + cor.map(cfgRowHTML).join("");
+    html += `<h3 class="cfg-h">Tipos de apagón</h3>` + apa.map(cfgRowHTML).join("");
+    if(cfgEditingId === "__new__"){
+      html += cfgEditHTML("__new__", "", nextColor());
+    } else {
+      html += `<button type="button" class="cat-add" data-cfg-add="1">➕ Añadir tipo de apagón</button>`;
+    }
+    html += `<p class="cat-notice" role="status">${esc(cfgNotice)}</p>`;
+    body.innerHTML = html;
+    const nameEl = document.getElementById("cfgName");
+    if(nameEl){ nameEl.focus(); nameEl.select(); }
+  }
+
+  function afterCatsChange(){
+    saveCats();
+    renderBreakers();
+    renderLegend();
+    renderAll();
+    renderCfg();
+  }
+
+  function cfgSave(id){
+    const name = document.getElementById("cfgName").value.trim();
+    const color = document.getElementById("cfgColor").value;
+    if(!name){ cfgNotice = "Escribe un nombre."; renderCfg(); return; }
+    if(cats.some(c => c.id !== id && c.label.toLowerCase() === name.toLowerCase())){
+      cfgNotice = "Ya existe una categoría con ese nombre."; renderCfg(); return;
+    }
+    if(id === "__new__"){
+      cats.push({id:newCatId(), label:name, color, group:"apagon"});
+    } else {
+      const c = cats.find(x => x.id === id);
+      if(c){ c.label = name; c.color = color; }
+    }
+    cfgEditingId = null; cfgNotice = "";
+    afterCatsChange();
+  }
+
+  function cfgDelete(id){
+    const c = cats.find(x => x.id === id);
+    if(!c) return;
+    const n = usageCount(id);
+    if(c.group === "corriente"){ cfgNotice = "Corriente es la categoría base y no se puede eliminar."; renderCfg(); return; }
+    if(n > 0){ cfgNotice = `No se puede eliminar «${c.label}»: la usan ${n} registro(s).`; renderCfg(); return; }
+    if(cats.filter(x => x.group === "apagon").length === 1){ cfgNotice = "Debe existir al menos un tipo de apagón."; renderCfg(); return; }
+    if(!confirm(`¿Eliminar «${c.label}»?`)) return;
+    cats = cats.filter(x => x.id !== id);
+    cfgEditingId = null; cfgNotice = "";
+    afterCatsChange();
+  }
+
+  function initCfg(){
+    const body = document.getElementById("cfgBody");
+    body.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if(!btn) return;
+      if(btn.hasAttribute("data-cfg-edit")){ cfgEditingId = btn.getAttribute("data-cfg-edit"); cfgNotice = ""; renderCfg(); }
+      else if(btn.hasAttribute("data-cfg-del")){ cfgDelete(btn.getAttribute("data-cfg-del")); }
+      else if(btn.hasAttribute("data-cfg-add")){ cfgEditingId = "__new__"; cfgNotice = ""; renderCfg(); }
+      else if(btn.hasAttribute("data-cfg-save")){ cfgSave(btn.getAttribute("data-cfg-save")); }
+      else if(btn.hasAttribute("data-cfg-cancel")){ cfgEditingId = null; cfgNotice = ""; renderCfg(); }
+    });
+    body.addEventListener("keydown", (e) => {
+      if(e.target.id !== "cfgName") return;
+      if(e.key === "Enter"){ e.preventDefault(); cfgSave(cfgEditingId); }
+      else if(e.key === "Escape"){ e.stopPropagation(); cfgEditingId = null; cfgNotice = ""; renderCfg(); }
+    });
+  }
+
+  // ---------- modales ----------
+  const modals = [];
+  function setupModal(modalEl, openBtn, closeBtn, onOpen){
+    const open = () => { if(onOpen) onOpen(); modalEl.hidden = false; closeBtn.focus(); };
+    const close = () => { modalEl.hidden = true; openBtn.focus(); };
+    openBtn.addEventListener("click", open);
+    closeBtn.addEventListener("click", close);
+    modalEl.addEventListener("click", (e) => { if(e.target === modalEl) close(); });
+    modals.push({modalEl, close});
+  }
+
+  function init(){
+    loadEvents();
+    loadCats();
+    closeStaleOpenEvent();
+
+    document.getElementById("entryDate").value = todayStr();
+    document.getElementById("entryTime").value = nowTimeStr();
+    renderBreakers();
+    renderLegend();
+    initCfg();
+    applyPreset("7");
+
+    document.getElementById("addEventBtn").addEventListener("click", () => {
+      addEvent(selectedCat, document.getElementById("entryDate").value, document.getElementById("entryTime").value);
+    });
+
+    document.querySelectorAll("[data-preset]").forEach(b => {
+      b.addEventListener("click", () => applyPreset(b.getAttribute("data-preset")));
+    });
+    document.getElementById("fromDate").addEventListener("change", () => { renderChart(); renderTable(); });
+    document.getElementById("toDate").addEventListener("change", () => { renderChart(); renderTable(); });
+
+    setupModal(document.getElementById("helpModal"), document.getElementById("helpBtn"), document.getElementById("helpClose"));
+    setupModal(document.getElementById("cfgModal"), document.getElementById("cfgBtn"), document.getElementById("cfgClose"),
+      () => { cfgEditingId = null; cfgNotice = ""; renderCfg(); });
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "Escape") modals.forEach(m => { if(!m.modalEl.hidden) m.close(); });
+    });
+
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+    document.getElementById("printBtn2").addEventListener("click", () => window.print());
+    document.getElementById("exportBtn").addEventListener("click", exportCSV);
+    document.getElementById("exportBtn2").addEventListener("click", exportCSV);
+
+    const importFile = document.getElementById("importFile");
+    document.getElementById("importBtn").addEventListener("click", () => importFile.click());
+    document.getElementById("importBtn2").addEventListener("click", () => importFile.click());
+    importFile.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if(file) importCSVFile(file);
+      e.target.value = "";
+    });
+
+    renderAll();
+    timerInterval = setInterval(updateStatusPanel, 1000);
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+</body>
+</html>

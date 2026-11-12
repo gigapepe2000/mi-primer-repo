@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pago de Servicios</title>
+<style>
+  :root{
+    --azul-900:#0f2942;
+    --azul-800:#16354d;
+    --azul-700:#1e4a6d;
+    --azul-600:#2b6a94;
+    --azul-500:#3d84b8;
+    --acento:#2f8f6f;
+    --acento-oscuro:#256e56;
+    --rojo:#c0392b;
+    --rojo-suave:#fdecea;
+    --gris-50:#f7f8fa;
+    --gris-100:#eef1f4;
+    --gris-200:#e2e6eb;
+    --gris-300:#cdd3da;
+    --gris-500:#78838f;
+    --gris-700:#45505c;
+    --gris-900:#1c232b;
+    --blanco:#ffffff;
+    --radio:8px;
+    --sombra:0 1px 3px rgba(15,41,66,0.08), 0 1px 2px rgba(15,41,66,0.06);
+    --sombra-md:0 4px 14px rgba(15,41,66,0.12);
+    --fuente:'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:var(--fuente);
+    background:var(--gris-50);
+    color:var(--gris-900);
+    font-size:14px;
+    line-height:1.45;
+  }
+  header.app-header{
+    background:var(--azul-900);
+    color:var(--blanco);
+    padding:14px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  header.app-header h1{
+    font-size:18px;
+    font-weight:600;
+    margin:0;
+    letter-spacing:0.2px;
+  }
+  header.app-header .subtitulo{
+    font-size:12px;
+    color:#a8c2d6;
+    margin-top:2px;
+  }
+  nav.tabs{
+    display:flex;
+    background:var(--azul-800);
+    padding:0 20px;
+    overflow-x:auto;
+  }
+  nav.tabs button{
+    background:transparent;
+    border:none;
+    color:#c7d9e6;
+    padding:12px 18px;
+    font-size:13.5px;
+    font-weight:500;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    white-space:nowrap;
+    transition:color .15s, border-color .15s, background .15s;
+  }
+  nav.tabs button:hover{
+    color:var(--blanco);
+    background:rgba(255,255,255,0.06);
+  }
+  nav.tabs button.activo{
+    color:var(--blanco);
+    border-bottom-color:var(--acento);
+  }
+  main{
+    max-width:1280px;
+    margin:0 auto;
+    padding:20px 24px 60px;
+  }
+  section.tab{display:none;}
+  section.tab.activo{display:block;}
+
+  /* ---- Barra de herramientas ---- */
+  .toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:10px;
+    flex-wrap:wrap;
+  }
+  .toolbar .buscador{
+    flex:1;
+    min-width:220px;
+    position:relative;
+  }
+  .toolbar .buscador input{
+    width:100%;
+    padding:9px 12px 9px 34px;
+    border:1px solid var(--gris-300);
+    border-radius:var(--radio);
+    font-size:13.5px;
+    background:var(--blanco) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="%2378838f" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>') no-repeat 10px center;
+  }
+  .toolbar .buscador input:focus{
+    outline:2px solid var(--azul-500);
+    outline-offset:-1px;
+  }
+  .toolbar .acciones{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  button.btn{
+    border:1px solid var(--gris-300);
+    background:var(--blanco);
+    color:var(--gris-900);
+    padding:9px 14px;
+    border-radius:var(--radio);
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:background .15s, border-color .15s;
+  }
+  button.btn:hover{background:var(--gris-100);}
+  button.btn:focus-visible{outline:2px solid var(--azul-500); outline-offset:1px;}
+  button.btn-primario{
+    background:var(--acento);
+    border-color:var(--acento);
+    color:var(--blanco);
+  }
+  button.btn-primario:hover{background:var(--acento-oscuro); border-color:var(--acento-oscuro);}
+  button.btn-peligro{
+    background:var(--blanco);
+    border-color:var(--rojo);
+    color:var(--rojo);
+  }
+  button.btn-peligro:hover{background:var(--rojo-suave);}
+  button.btn-sm{
+    padding:5px 9px;
+    font-size:12px;
+    border-radius:6px;
+  }
+  button.icono-solo{
+    padding:6px 9px;
+    background:transparent;
+    border:1px solid transparent;
+  }
+  button.icono-solo:hover{background:var(--gris-100); border-color:var(--gris-200);}
+
+  /* ---- Franja de filtros activos ---- */
+  .franja-filtros{
+    display:none;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    background:#eef6f2;
+    border:1px solid #cfe6da;
+    border-radius:var(--radio);
+    padding:8px 12px;
+    margin-bottom:14px;
+  }
+  .franja-filtros.visible{display:flex;}
+  .franja-filtros .etiqueta-titulo{
+    font-size:12px;
+    font-weight:600;
+    color:var(--acento-oscuro);
+    margin-right:4px;
+  }
+  .chip{
+    background:var(--blanco);
+    border:1px solid #b9dcc9;
+    color:var(--acento-oscuro);
+    font-size:12px;
+    padding:4px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .franja-filtros button{
+    margin-left:auto;
+  }
+
+  /* ---- Tabla ---- */
+  .tabla-wrap{
+    background:var(--blanco);
+    border:1px solid var(--gris-200);
+    border-radius:var(--radio);
+    overflow:auto;
+    max-height:68vh;
+    box-shadow:var(--sombra);
+  }
+  table{
+    border-collapse:separate;
+    border-spacing:0;
+    width:100%;
+    min-width:900px;
+  }
+  thead th{
+    position:sticky;
+    top:0;
+    z-index:2;
+    background:var(--gris-100);
+    color:var(--gris-700);
+    text-align:left;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    padding:10px 12px;
+    border-bottom:1px solid var(--gris-200);
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:10px 12px;
+    border-bottom:1px solid var(--gris-100);
+    font-size:13.5px;
+    white-space:nowrap;
+  }
+  tbody tr:hover td{background:#f5f9fb;}
+  td.observaciones{
+    white-space:normal;
+    max-width:260px;
+    color:var(--gris-700);
+  }
+  td.importe{text-align:right; font-variant-numeric:tabular-nums; font-weight:600;}
+  td.acciones{white-space:nowrap;}
+  .estado-vacio{
+    padding:40px 20px;
+    text-align:center;
+    color:var(--gris-500);
+    font-size:13.5px;
+  }
+  .badge-tipo{
+    display:inline-block;
+    padding:2px 9px;
+    border-radius:999px;
+    font-size:11.5px;
+    font-weight:600;
+  }
+  .badge-Telecomunicaciones{background:#dde6f5; color:#12295c;}
+  .badge-Electrica{background:#fbe1df; color:#a3241a;}
+  .badge-Agua{background:#e0f2fb; color:#0f7bab;}
+  .badge-Gas{background:#e1f3e7; color:#1c7a41;}
+
+  /* ---- Formularios ---- */
+  .panel{
+    background:var(--blanco);
+    border:1px solid var(--gris-200);
+    border-radius:var(--radio);
+    padding:22px 24px;
+    box-shadow:var(--sombra);
+    max-width:760px;
+  }
+  .panel h2{
+    font-size:16px;
+    margin:0 0 4px;
+    color:var(--azul-900);
+  }
+  .panel .ayuda{
+    font-size:12.5px;
+    color:var(--gris-500);
+    margin:0 0 18px;
+  }
+  .grid-form{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:14px 16px;
+  }
+  .campo{display:flex; flex-direction:column; gap:5px; min-width:0;}
+  .campo select, .campo input, .campo textarea{width:100%; min-width:0; max-width:100%;}
+  select{text-overflow:ellipsis;}
+  .campo.full{grid-column:1 / -1;}
+  .campo label{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--gris-700);
+  }
+  .campo .req{color:var(--rojo); margin-left:2px;}
+  input[type=text], input[type=date], input[type=number], select, textarea{
+    padding:9px 10px;
+    border:1px solid var(--gris-300);
+    border-radius:6px;
+    font-size:13.5px;
+    font-family:inherit;
+    background:var(--blanco);
+    color:var(--gris-900);
+  }
+  input:disabled, select:disabled{
+    background:var(--gris-100);
+    color:var(--gris-500);
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:2px solid var(--azul-500);
+    outline-offset:-1px;
+    border-color:var(--azul-500);
+  }
+  textarea{resize:vertical; min-height:64px;}
+  .form-acciones{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+    padding-top:16px;
+    border-top:1px solid var(--gris-100);
+  }
+  .msg-error{
+    color:var(--rojo);
+    font-size:12px;
+    margin-top:-2px;
+  }
+  .aviso-form{
+    display:none;
+    background:#fdecea;
+    border:1px solid #f3c6c1;
+    color:var(--rojo);
+    font-size:12.5px;
+    padding:8px 12px;
+    border-radius:6px;
+    margin-bottom:14px;
+  }
+  .aviso-form.visible{display:block;}
+
+  /* ---- Búsqueda avanzada ---- */
+  .panel-filtros{
+    min-width:0;
+    overflow:hidden;
+    background:var(--blanco);
+    border:1px solid var(--gris-200);
+    border-radius:var(--radio);
+    padding:20px 22px;
+    box-shadow:var(--sombra);
+    margin-bottom:18px;
+  }
+  .resumen-activos{
+    font-size:12.5px;
+    color:var(--gris-700);
+    margin:14px 0 0;
+    padding-top:12px;
+    border-top:1px solid var(--gris-100);
+  }
+  .resumen-activos b{color:var(--acento-oscuro);}
+
+  /* ---- Estadísticas / Resumen por período ---- */
+  .tarjetas-periodo{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(min(100%,320px),1fr));
+    gap:16px;
+  }
+  .tarjeta-periodo{
+    min-width:0;
+    background:var(--blanco);
+    border:1px solid var(--gris-200);
+    border-radius:var(--radio);
+    box-shadow:var(--sombra);
+    overflow:hidden;
+  }
+  .tarjeta-periodo h3{
+    margin:0;
+    padding:12px 16px;
+    background:var(--azul-900);
+    color:var(--blanco);
+    font-size:14px;
+  }
+  .tarjeta-periodo .scroll-x{overflow-x:auto; max-width:100%;}
+  .tarjeta-periodo table{min-width:100%; width:max-content;}
+  .tarjeta-periodo th:first-child, .tarjeta-periodo td:first-child{position:static; box-shadow:none;}
+  .tarjeta-periodo thead th, .tarjeta-periodo thead th:first-child{position:static; background:var(--gris-50);}
+  .tarjeta-periodo th, .tarjeta-periodo td{
+    padding:7px 12px;
+    font-size:12.5px;
+    white-space:nowrap;
+    position:static;
+  }
+  .tarjeta-periodo th{background:var(--gris-50); text-transform:none; letter-spacing:0;}
+  .stats-totales{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
+    gap:14px;
+    margin-bottom:22px;
+  }
+  .stat-card{
+    background:var(--blanco);
+    border:1px solid var(--gris-200);
+    border-radius:var(--radio);
+    padding:16px 18px;
+    box-shadow:var(--sombra);
+  }
+  .stat-card .valor{font-size:22px; font-weight:700; color:var(--azul-900);}
+  .stat-card .etiqueta{font-size:12px; color:var(--gris-500); margin-top:2px;}
+
+  /* ---- Datos maestros ---- */
+  .dos-columnas > *{min-width:0;}
+  .dos-columnas{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:20px;
+    align-items:start;
+  }
+  .lista-simple{
+    list-style:none;
+    margin:14px 0 0;
+    padding:0;
+    border-top:1px solid var(--gris-100);
+  }
+  .lista-simple li{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:9px 4px;
+    border-bottom:1px solid var(--gris-100);
+    font-size:13px;
+  }
+  .lista-simple .info b{display:block;}
+  .lista-simple .info span{color:var(--gris-500); font-size:12px;}
+  .grupo-propietario{margin-top:16px;}
+  .grupo-propietario h4{
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--azul-800);
+    margin:0 0 6px;
+    text-transform:uppercase;
+    letter-spacing:0.3px;
+  }
+
+  h2.titulo-tab{
+    font-size:17px;
+    margin:0 0 16px;
+    color:var(--azul-900);
+  }
+
+  @media (max-width: 760px){
+    .grid-form{grid-template-columns:minmax(0,1fr);}
+    .dos-columnas{grid-template-columns:minmax(0,1fr);}
+  }
+
+  /* ---- Botón de ayuda ---- */
+  button.btn-ayuda{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,0.35);
+    background:rgba(255,255,255,0.08);
+    color:var(--blanco);
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    transition:background .15s, border-color .15s;
+  }
+  button.btn-ayuda:hover{background:rgba(255,255,255,0.18); border-color:rgba(255,255,255,0.6);}
+  button.btn-ayuda:focus-visible{outline:2px solid var(--acento); outline-offset:2px;}
+
+  /* ---- Modal ---- */
+  .modal-fondo{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(15,41,66,0.45);
+    z-index:100;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .modal-fondo.visible{display:flex;}
+  .modal-caja{
+    background:var(--blanco);
+    border-radius:10px;
+    width:100%;
+    max-width:560px;
+    max-height:80vh;
+    display:flex;
+    flex-direction:column;
+    box-shadow:0 12px 40px rgba(15,41,66,0.28);
+  }
+  .modal-cabecera{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 20px;
+    border-bottom:1px solid var(--gris-200);
+  }
+  .modal-cabecera h3{
+    margin:0;
+    font-size:15.5px;
+    color:var(--azul-900);
+  }
+  .modal-cabecera button{
+    background:transparent;
+    border:none;
+    font-size:18px;
+    color:var(--gris-500);
+    cursor:pointer;
+    line-height:1;
+    padding:4px;
+  }
+  .modal-cabecera button:hover{color:var(--gris-900);}
+  .modal-cuerpo{
+    padding:18px 20px;
+    overflow-y:auto;
+    font-size:13.5px;
+    color:var(--gris-900);
+    white-space:pre-wrap;
+    line-height:1.6;
+  }
+  .modal-cuerpo textarea{
+    width:100%;
+    min-height:280px;
+    font-family:inherit;
+    font-size:13.5px;
+    line-height:1.6;
+    padding:10px 12px;
+    border:1px solid var(--gris-300);
+    border-radius:6px;
+  }
+  .modal-cuerpo .texto-vacio{color:var(--gris-500); font-style:italic;}
+  .modal-pie{
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+    padding:14px 20px;
+    border-top:1px solid var(--gris-200);
+  }
+
+  .encabezado-impresion{display:none;}
+
+  /* ---- Impresión ---- */
+  @media print{
+    header.app-header, nav.tabs, .toolbar, .franja-filtros, .form-acciones,
+    section.tab:not(#tab-pagos), td.acciones, th.col-acciones{
+      display:none !important;
+    }
+    section#tab-pagos{display:block !important;}
+    .encabezado-impresion{display:block !important; margin:0 0 14px;}
+    .encabezado-impresion h1{font-size:22px; margin:0 0 4px; color:#000;}
+    .encabezado-impresion p{font-size:11px; margin:0; color:#444;}
+    body{background:#fff;}
+    .tabla-wrap{max-height:none; overflow:visible; border:none; box-shadow:none;}
+    table{min-width:0;}
+    thead th, tbody td{white-space:normal;}
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div>
+    <h1>Pago de Servicios</h1>
+    <div class="subtitulo">Registro de pagos por propietario</div>
+  </div>
+  <button class="btn-ayuda" id="btnAyuda" title="Ayuda" aria-label="Ayuda">?</button>
+</header>
+
+<div class="modal-fondo" id="modalAyuda">
+  <div class="modal-caja">
+    <div class="modal-cabecera">
+      <h3>Ayuda</h3>
+      <button id="btnCerrarAyuda" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-cuerpo" id="cuerpoAyudaVista"></div>
+    <div class="modal-pie">
+      <button class="btn btn-primario" id="btnCerrarAyudaPie">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<nav class="tabs">
+  <button data-tab="tab-pagos" class="activo">Servicios Pagados</button>
+  <button data-tab="tab-busqueda">Búsqueda Avanzada</button>
+  <button data-tab="tab-nuevo">Añadir / Editar Pago</button>
+  <button data-tab="tab-stats">Estadísticas</button>
+  <button data-tab="tab-maestros">Datos Maestros</button>
+</nav>
+
+<main>
+
+  <!-- ============ TAB PAGOS ============ -->
+  <section id="tab-pagos" class="tab activo">
+    <div class="encabezado-impresion">
+      <h1>Pagos de servicios</h1>
+      <p id="filtrosImpresion"></p>
+    </div>
+    <div class="toolbar">
+      <div class="buscador">
+        <input type="text" id="buscadorRapido" placeholder="Buscar por propietario, tipo de factura o Nro. de transacción…">
+      </div>
+      <div class="acciones">
+        <button class="btn btn-primario" id="btnNuevoPago">➕ Nuevo Pago</button>
+        <button class="btn" id="btnImprimir">🖨️ Imprimir</button>
+        <button class="btn" id="btnExportarCSV">⬆️ Exportar CSV</button>
+        <button class="btn" id="btnImportarCSV">⬇️ Importar CSV</button>
+        <input type="file" id="inputImportarCSV" accept=".csv" style="display:none;">
+      </div>
+    </div>
+
+    <div class="franja-filtros" id="franjaFiltros">
+      <span class="etiqueta-titulo">Filtros activos:</span>
+      <div id="chipsFiltros" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+      <button class="btn btn-sm" id="btnLimpiarFranja">✕ Limpiar</button>
+    </div>
+
+    <div class="tabla-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Propietario</th>
+            <th>Tipo de factura</th>
+            <th>Factura</th>
+            <th>Período</th>
+            <th>Importe</th>
+            <th>Nro. Transacción</th>
+            <th>Observaciones</th>
+            <th class="col-acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpoTablaPagos"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ TAB BÚSQUEDA AVANZADA ============ -->
+  <section id="tab-busqueda" class="tab">
+    <h2 class="titulo-tab">Búsqueda Avanzada</h2>
+    <div class="panel-filtros">
+      <div class="grid-form">
+        <div class="campo">
+          <label>Propietario</label>
+          <select id="fPropietario"><option value="">Todos</option></select>
+        </div>
+        <div class="campo">
+          <label>Tipo de factura</label>
+          <select id="fTipo">
+            <option value="">Todos</option>
+            <option value="Telecomunicaciones">Telecomunicaciones</option>
+            <option value="Electrica">Eléctrica</option>
+            <option value="Agua">Agua</option>
+            <option value="Gas">Gas</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Factura</label>
+          <select id="fFactura"><option value="">Todas</option></select>
+        </div>
+        <div class="campo">
+          <label>Período</label>
+          <select id="fPeriodo"><option value="">Todos</option></select>
+        </div>
+        <div class="campo">
+          <label>Fecha de pago — desde</label>
+          <input type="date" id="fFechaDesde">
+        </div>
+        <div class="campo">
+          <label>Fecha de pago — hasta</label>
+          <input type="date" id="fFechaHasta">
+        </div>
+        <div class="campo">
+          <label>Importe mínimo</label>
+          <input type="number" id="fImporteMin" step="0.01" min="0" placeholder="0.00">
+        </div>
+        <div class="campo">
+          <label>Importe máximo</label>
+          <input type="number" id="fImporteMax" step="0.01" min="0" placeholder="0.00">
+        </div>
+        <div class="campo full">
+          <label>Nro. Transacción (contiene)</label>
+          <input type="text" id="fNroTransaccion" placeholder="Texto a buscar dentro del Nro. de transacción…">
+        </div>
+        <div class="campo full">
+          <label>Observaciones (contiene)</label>
+          <input type="text" id="fObservaciones" placeholder="Texto a buscar dentro de las observaciones…">
+        </div>
+      </div>
+      <div class="form-acciones">
+        <button class="btn btn-primario" id="btnAplicarFiltros">✅ Aplicar filtros</button>
+        <button class="btn btn-peligro" id="btnLimpiarFiltros">🗑️ Limpiar filtros</button>
+      </div>
+      <div class="resumen-activos" id="resumenFiltrosAvanzados">Sin filtros activos.</div>
+    </div>
+  </section>
+
+  <!-- ============ TAB NUEVO / EDITAR PAGO ============ -->
+  <section id="tab-nuevo" class="tab">
+    <h2 class="titulo-tab" id="tituloFormPago">Añadir Pago</h2>
+    <div class="panel">
+      <p class="ayuda">Los campos marcados con <span class="req">*</span> son obligatorios.</p>
+      <div class="aviso-form" id="avisoFormPago"></div>
+      <form id="formPago">
+        <input type="hidden" id="pagoId">
+        <div class="grid-form">
+          <div class="campo">
+            <label>Fecha de pago <span class="req">*</span></label>
+            <input type="date" id="campoFecha" required>
+          </div>
+          <div class="campo">
+            <label>Propietario <span class="req">*</span></label>
+            <select id="campoPropietario" required>
+              <option value="">Seleccionar…</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Tipo de factura <span class="req">*</span></label>
+            <select id="campoTipo" required disabled>
+              <option value="">Seleccioná un propietario primero</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Factura <span class="req">*</span></label>
+            <select id="campoFactura" required disabled>
+              <option value="">Seleccioná un tipo primero</option>
+            </select>
+          </div>
+          <div class="campo" id="wrapPeriodoTipo">
+            <label>Período <span class="req">*</span></label>
+            <select id="campoPeriodoValor" required disabled>
+              <option value="">Seleccioná un tipo primero</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Año <span class="req">*</span></label>
+            <select id="campoAnio" required></select>
+          </div>
+          <div class="campo">
+            <label>Importe <span class="req">*</span></label>
+            <input type="number" id="campoImporte" step="0.01" min="0" placeholder="0.00" required>
+          </div>
+          <div class="campo">
+            <label>Nro. Transacción</label>
+            <input type="text" id="campoNroTransaccion" placeholder="Nº de operación o comprobante">
+          </div>
+          <div class="campo full">
+            <label>Observaciones</label>
+            <textarea id="campoObservaciones" placeholder="Notas adicionales sobre este pago…"></textarea>
+          </div>
+        </div>
+        <div class="form-acciones">
+          <button type="submit" class="btn btn-primario" id="btnGuardarPago">Guardar pago</button>
+          <button type="button" class="btn" id="btnCancelarPago">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ TAB ESTADÍSTICAS ============ -->
+  <section id="tab-stats" class="tab">
+    <h2 class="titulo-tab">Estadísticas</h2>
+    <div class="stats-totales" id="statsTotales"></div>
+    <div class="tarjetas-periodo" id="tarjetasPeriodo"></div>
+  </section>
+
+  <!-- ============ TAB DATOS MAESTROS ============ -->
+  <section id="tab-maestros" class="tab">
+    <div class="toolbar" style="justify-content:flex-end;">
+      <h2 class="titulo-tab" style="margin:0; margin-right:auto;">Datos Maestros</h2>
+      <div class="acciones">
+        <button class="btn" id="btnExportarMaestrosCSV">⬆️ Exportar CSV</button>
+        <button class="btn" id="btnImportarMaestrosCSV">⬇️ Importar CSV</button>
+        <input type="file" id="inputImportarMaestrosCSV" accept=".csv" style="display:none;">
+      </div>
+    </div>
+    <div class="dos-columnas">
+      <div class="panel" style="max-width:none;">
+        <h2 style="font-size:14px;">Propietarios</h2>
+        <p class="ayuda">Registrá aquí a cada propietario antes de cargarle facturas.</p>
+        <form id="formPropietario" style="display:flex; gap:10px; align-items:flex-end;">
+          <div class="campo" style="flex:1;">
+            <label>Nombre del propietario <span class="req">*</span></label>
+            <input type="text" id="campoNombrePropietario" required placeholder="Ej: Juan Pérez">
+          </div>
+          <button class="btn btn-primario" type="submit" id="btnGuardarPropietario">➕ Añadir</button>
+          <button class="btn" type="button" id="btnCancelarPropietario" style="display:none;">Cancelar</button>
+        </form>
+        <ul class="lista-simple" id="listaPropietarios"></ul>
+      </div>
+
+      <div class="panel" style="max-width:none;">
+        <h2 style="font-size:14px;">Facturas</h2>
+        <p class="ayuda">Asociá cada factura a un propietario y un tipo de servicio.</p>
+        <form id="formFactura">
+          <div class="aviso-form" id="avisoFactura" style="background:#eef6fb; border-color:#c5deee; color:var(--azul-700);"></div>
+          <div class="grid-form">
+            <div class="campo">
+              <label>Propietario <span class="req">*</span></label>
+              <select id="campoFacturaPropietario" required>
+                <option value="">Seleccionar…</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label>Tipo de factura <span class="req">*</span></label>
+              <select id="campoFacturaTipo" required>
+                <option value="">Seleccionar…</option>
+                <option value="Telecomunicaciones">Telecomunicaciones</option>
+                <option value="Electrica">Eléctrica</option>
+                <option value="Agua">Agua</option>
+                <option value="Gas">Gas</option>
+              </select>
+            </div>
+            <div class="campo full">
+              <label>Número / identificador de factura <span class="req">*</span></label>
+              <input type="text" id="campoFacturaNumero" required placeholder="Ej: Contrato 00123">
+            </div>
+          </div>
+          <div class="form-acciones">
+            <button class="btn btn-primario" type="submit" id="btnGuardarFactura">➕ Añadir factura</button>
+            <button class="btn" type="button" id="btnCancelarFactura" style="display:none;">Cancelar</button>
+          </div>
+        </form>
+        <div id="listaFacturasPorPropietario"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =========================================================
+     1. CONSTANTES Y ESQUEMA
+  ========================================================= */
+  var TIPOS = ["Telecomunicaciones","Electrica","Agua","Gas"];
+  var TIPO_ETIQUETA = {Telecomunicaciones:"Telecomunicaciones", Electrica:"Eléctrica", Agua:"Agua", Gas:"Gas"};
+  var MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  var BIMESTRES = ["Bim 01","Bim 02","Bim 03","Bim 04","Bim 05","Bim 06"];
+
+  var CLAVES = { propietarios:"psvc_propietarios", facturas:"psvc_facturas", pagos:"psvc_pagos", filtros:"psvc_filtros" };
+
+  /* =========================================================
+     2. CAPA DE ACCESO A localStorage
+  ========================================================= */
+  var db = {
+    get: function(clave, porDefecto){
+      try{
+        var raw = localStorage.getItem(clave);
+        return raw ? JSON.parse(raw) : (porDefecto !== undefined ? porDefecto : []);
+      }catch(e){ return porDefecto !== undefined ? porDefecto : []; }
+    },
+    set: function(clave, valor){
+      localStorage.setItem(clave, JSON.stringify(valor));
+    }
+  };
+
+  function generarId(){
+    return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,9);
+  }
+
+  function formatearImporte(n){
+    var num = parseFloat(n);
+    if(isNaN(num)) num = 0;
+    return num.toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function formatearFecha(iso){
+    if(!iso) return '';
+    var partes = iso.split('-');
+    if(partes.length !== 3) return iso;
+    return partes[2] + '/' + partes[1] + '/' + partes[0];
+  }
+
+  function escaparCSV(valor){
+    var s = (valor === null || valor === undefined) ? '' : String(valor);
+    if(/[",\n]/.test(s)){
+      s = '"' + s.replace(/"/g,'""') + '"';
+    }
+    return s;
+  }
+
+  /* =========================================================
+     3. ESTADO EN MEMORIA
+  ========================================================= */
+  var estado = {
+    tabActual: 'tab-pagos',
+    editandoPagoId: null,
+    busquedaRapida: '',
+    filtrosAvanzados: db.get(CLAVES.filtros, {})
+  };
+
+  /* =========================================================
+     4. NAVEGACIÓN ENTRE PESTAÑAS
+  ========================================================= */
+  function mostrarTab(id){
+    document.querySelectorAll('section.tab').forEach(function(s){ s.classList.remove('activo'); });
+    document.querySelectorAll('nav.tabs button').forEach(function(b){ b.classList.remove('activo'); });
+    document.getElementById(id).classList.add('activo');
+    document.querySelector('nav.tabs button[data-tab="'+id+'"]').classList.add('activo');
+    estado.tabActual = id;
+
+    if(id === 'tab-pagos') renderTablaPagos();
+    if(id === 'tab-busqueda') renderTabBusqueda();
+    if(id === 'tab-nuevo' && estado.editandoPagoId === null) prepararFormularioNuevo();
+    if(id === 'tab-stats') renderEstadisticas();
+    if(id === 'tab-maestros') renderTabMaestros();
+  }
+
+  document.querySelectorAll('nav.tabs button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      if(estado.tabActual === 'tab-nuevo' && btn.dataset.tab !== 'tab-nuevo'){
+        estado.editandoPagoId = null;
+      }
+      mostrarTab(btn.dataset.tab);
+    });
+  });
+
+  /* =========================================================
+     5. FILTRADO CENTRAL DE PAGOS
+  ========================================================= */
+  function obtenerPagosFiltrados(){
+    var pagos = db.get(CLAVES.pagos, []);
+    var propietarios = db.get(CLAVES.propietarios, []);
+    var facturas = db.get(CLAVES.facturas, []);
+    var f = estado.filtrosAvanzados || {};
+    var texto = (estado.busquedaRapida || '').trim().toLowerCase();
+
+    function nombrePropietario(id){
+      var p = propietarios.filter(function(x){ return x.id === id; })[0];
+      return p ? p.nombre : '';
+    }
+    function numeroFactura(id){
+      var fa = facturas.filter(function(x){ return x.id === id; })[0];
+      return fa ? fa.numero : '';
+    }
+
+    return pagos.filter(function(p){
+      var propNombre = nombrePropietario(p.propietarioId);
+      var facturaNum = numeroFactura(p.facturaId);
+
+      if(texto){
+        var enTexto = (propNombre.toLowerCase().indexOf(texto) !== -1) ||
+                      (TIPO_ETIQUETA[p.tipo] || '').toLowerCase().indexOf(texto) !== -1 ||
+                      (p.nroTransaccion || '').toLowerCase().indexOf(texto) !== -1;
+        if(!enTexto) return false;
+      }
+      if(f.propietarioId && p.propietarioId !== f.propietarioId) return false;
+      if(f.tipo && p.tipo !== f.tipo) return false;
+      if(f.facturaId && p.facturaId !== f.facturaId) return false;
+      if(f.periodo && p.periodo !== f.periodo) return false;
+      if(f.fechaDesde && p.fecha < f.fechaDesde) return false;
+      if(f.fechaHasta && p.fecha > f.fechaHasta) return false;
+      if(f.importeMin !== undefined && f.importeMin !== null && f.importeMin !== '' && parseFloat(p.importe) < parseFloat(f.importeMin)) return false;
+      if(f.importeMax !== undefined && f.importeMax !== null && f.importeMax !== '' && parseFloat(p.importe) > parseFloat(f.importeMax)) return false;
+      if(f.nroTransaccion){
+        var nro = (p.nroTransaccion || '').toLowerCase();
+        if(nro.indexOf(f.nroTransaccion.toLowerCase()) === -1) return false;
+      }
+      if(f.observaciones){
+        var obs = (p.observaciones || '').toLowerCase();
+        if(obs.indexOf(f.observaciones.toLowerCase()) === -1) return false;
+      }
+      return true;
+    }).map(function(p){
+      return Object.assign({}, p, {propNombre: nombrePropietario(p.propietarioId), facturaNum: numeroFactura(p.facturaId)});
+    }).sort(function(a,b){ return b.fecha.localeCompare(a.fecha); });
+  }
+
+  function hayFiltrosActivos(){
+    var f = estado.filtrosAvanzados || {};
+    return Object.keys(f).some(function(k){ return f[k] !== undefined && f[k] !== null && f[k] !== ''; });
+  }
+
+  /* =========================================================
+     6. RENDER: TABLA DE PAGOS
+  ========================================================= */
+  function renderTablaPagos(){
+    var cuerpo = document.getElementById('cuerpoTablaPagos');
+    var filas = obtenerPagosFiltrados();
+    cuerpo.innerHTML = '';
+
+    if(filas.length === 0){
+      cuerpo.innerHTML = '<tr><td colspan="8"><div class="estado-vacio">No hay pagos registrados con los criterios actuales.</div></td></tr>';
+    } else {
+      filas.forEach(function(p){
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>' + escapeHtml(p.propNombre || '(sin propietario)') + '</td>' +
+          '<td><span class="badge-tipo badge-' + p.tipo + '">' + TIPO_ETIQUETA[p.tipo] + '</span></td>' +
+          '<td>' + escapeHtml(p.facturaNum || '') + '</td>' +
+          '<td>' + escapeHtml(p.periodo || '') + '</td>' +
+          '<td class="importe">$ ' + formatearImporte(p.importe) + '</td>' +
+          '<td>' + escapeHtml(p.nroTransaccion || '') + '</td>' +
+          '<td class="observaciones">' + escapeHtml(p.observaciones || '') + '</td>' +
+          '<td class="acciones">' +
+            '<button class="icono-solo" title="Editar" data-accion="editar" data-id="' + p.id + '">✏️</button>' +
+            '<button class="icono-solo" title="Eliminar" data-accion="eliminar" data-id="' + p.id + '">🗑️</button>' +
+          '</td>';
+        cuerpo.appendChild(tr);
+      });
+    }
+    renderFranjaFiltros();
+  }
+
+  function escapeHtml(s){
+    return String(s === undefined || s === null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  document.getElementById('cuerpoTablaPagos').addEventListener('click', function(e){
+    var btn = e.target.closest('button');
+    if(!btn) return;
+    var id = btn.dataset.id;
+    if(btn.dataset.accion === 'editar'){
+      cargarPagoParaEditar(id);
+    } else if(btn.dataset.accion === 'eliminar'){
+      if(confirm('¿Confirmás que querés eliminar este pago? Esta acción no se puede deshacer.')){
+        var pagos = db.get(CLAVES.pagos, []).filter(function(p){ return p.id !== id; });
+        db.set(CLAVES.pagos, pagos);
+        renderTablaPagos();
+      }
+    }
+  });
+
+  document.getElementById('buscadorRapido').addEventListener('input', function(e){
+    estado.busquedaRapida = e.target.value;
+    renderTablaPagos();
+  });
+
+  /* ---- Franja de filtros activos (visibles en pestaña Pagos) ---- */
+  function renderFranjaFiltros(){
+    var franja = document.getElementById('franjaFiltros');
+    var chips = document.getElementById('chipsFiltros');
+    var f = estado.filtrosAvanzados || {};
+    var propietarios = db.get(CLAVES.propietarios, []);
+    var facturas = db.get(CLAVES.facturas, []);
+    var etiquetas = [];
+
+    if(f.propietarioId){
+      var p = propietarios.filter(function(x){return x.id===f.propietarioId;})[0];
+      etiquetas.push('Propietario: ' + (p ? p.nombre : '—'));
+    }
+    if(f.tipo) etiquetas.push('Tipo: ' + TIPO_ETIQUETA[f.tipo]);
+    if(f.facturaId){
+      var fa = facturas.filter(function(x){return x.id===f.facturaId;})[0];
+      etiquetas.push('Factura: ' + (fa ? fa.numero : '—'));
+    }
+    if(f.periodo) etiquetas.push('Período: ' + f.periodo);
+    if(f.fechaDesde) etiquetas.push('Desde: ' + formatearFecha(f.fechaDesde));
+    if(f.fechaHasta) etiquetas.push('Hasta: ' + formatearFecha(f.fechaHasta));
+    if(f.importeMin) etiquetas.push('Importe ≥ $' + formatearImporte(f.importeMin));
+    if(f.importeMax) etiquetas.push('Importe ≤ $' + formatearImporte(f.importeMax));
+    if(f.nroTransaccion) etiquetas.push('Nro. Transacción contiene: "' + f.nroTransaccion + '"');
+    if(f.observaciones) etiquetas.push('Observaciones contiene: "' + f.observaciones + '"');
+
+    var etiquetasImpresion = etiquetas.slice();
+    if((estado.busquedaRapida || '').trim()) etiquetasImpresion.push('Búsqueda: "' + estado.busquedaRapida.trim() + '"');
+    document.getElementById('filtrosImpresion').textContent = 'Filtros activos: ' +
+      (etiquetasImpresion.length ? etiquetasImpresion.join(' | ') : 'ninguno');
+
+    if(etiquetas.length === 0){
+      franja.classList.remove('visible');
+      chips.innerHTML = '';
+      return;
+    }
+    franja.classList.add('visible');
+    chips.innerHTML = etiquetas.map(function(t){ return '<span class="chip">'+escapeHtml(t)+'</span>'; }).join('');
+  }
+
+  document.getElementById('btnLimpiarFranja').addEventListener('click', function(){
+    estado.filtrosAvanzados = {};
+    db.set(CLAVES.filtros, {});
+    renderTablaPagos();
+  });
+
+  /* =========================================================
+     7. BÚSQUEDA AVANZADA
+  ========================================================= */
+  function poblarSelectPropietarios(select, incluirTodos){
+    var propietarios = db.get(CLAVES.propietarios, []).slice().sort(function(a,b){return a.nombre.localeCompare(b.nombre);});
+    var actual = select.value;
+    select.innerHTML = (incluirTodos ? '<option value="">Todos</option>' : '<option value="">Seleccionar…</option>') +
+      propietarios.map(function(p){ return '<option value="'+p.id+'">'+escapeHtml(p.nombre)+'</option>'; }).join('');
+    select.value = actual || '';
+  }
+
+  function renderTabBusqueda(){
+    poblarSelectPropietarios(document.getElementById('fPropietario'), true);
+
+    var facturas = db.get(CLAVES.facturas, []);
+    var propietarios = db.get(CLAVES.propietarios, []);
+    var selFactura = document.getElementById('fFactura');
+    selFactura.innerHTML = '<option value="">Todas</option>' + facturas.map(function(fa){
+      var prop = propietarios.filter(function(p){return p.id===fa.propietarioId;})[0];
+      var etiqueta = (prop?prop.nombre:'?') + ' — ' + TIPO_ETIQUETA[fa.tipo] + ' — ' + fa.numero;
+      return '<option value="'+fa.id+'">'+escapeHtml(etiqueta)+'</option>';
+    }).join('');
+
+    var pagos = db.get(CLAVES.pagos, []);
+    var periodosUnicos = Array.from(new Set(pagos.map(function(p){return p.periodo;}))).sort();
+    var selPeriodo = document.getElementById('fPeriodo');
+    selPeriodo.innerHTML = '<option value="">Todos</option>' + periodosUnicos.map(function(per){
+      return '<option value="'+escapeHtml(per)+'">'+escapeHtml(per)+'</option>';
+    }).join('');
+
+    var f = estado.filtrosAvanzados || {};
+    document.getElementById('fPropietario').value = f.propietarioId || '';
+    document.getElementById('fTipo').value = f.tipo || '';
+    document.getElementById('fFactura').value = f.facturaId || '';
+    document.getElementById('fPeriodo').value = f.periodo || '';
+    document.getElementById('fFechaDesde').value = f.fechaDesde || '';
+    document.getElementById('fFechaHasta').value = f.fechaHasta || '';
+    document.getElementById('fImporteMin').value = f.importeMin || '';
+    document.getElementById('fImporteMax').value = f.importeMax || '';
+    document.getElementById('fNroTransaccion').value = f.nroTransaccion || '';
+    document.getElementById('fObservaciones').value = f.observaciones || '';
+
+    renderResumenFiltrosAvanzados();
+  }
+
+  function renderResumenFiltrosAvanzados(){
+    var el = document.getElementById('resumenFiltrosAvanzados');
+    if(!hayFiltrosActivos()){
+      el.innerHTML = 'Sin filtros activos.';
+      return;
+    }
+    var pagos = obtenerPagosFiltrados();
+    el.innerHTML = 'Filtros activos — <b>' + pagos.length + '</b> pago(s) coinciden con los criterios seleccionados.';
+  }
+
+  document.getElementById('btnAplicarFiltros').addEventListener('click', function(){
+    var f = {
+      propietarioId: document.getElementById('fPropietario').value,
+      tipo: document.getElementById('fTipo').value,
+      facturaId: document.getElementById('fFactura').value,
+      periodo: document.getElementById('fPeriodo').value,
+      fechaDesde: document.getElementById('fFechaDesde').value,
+      fechaHasta: document.getElementById('fFechaHasta').value,
+      importeMin: document.getElementById('fImporteMin').value,
+      importeMax: document.getElementById('fImporteMax').value,
+      nroTransaccion: document.getElementById('fNroTransaccion').value.trim(),
+      observaciones: document.getElementById('fObservaciones').value.trim()
+    };
+    estado.filtrosAvanzados = f;
+    db.set(CLAVES.filtros, f);
+    renderResumenFiltrosAvanzados();
+    mostrarTab('tab-pagos');
+  });
+
+  document.getElementById('btnLimpiarFiltros').addEventListener('click', function(){
+    estado.filtrosAvanzados = {};
+    db.set(CLAVES.filtros, {});
+    renderTabBusqueda();
+  });
+
+  /* =========================================================
+     8. FORMULARIO NUEVO / EDITAR PAGO
+  ========================================================= */
+  document.getElementById('btnNuevoPago').addEventListener('click', function(){
+    estado.editandoPagoId = null;
+    mostrarTab('tab-nuevo');
+    prepararFormularioNuevo();
+  });
+
+  function poblarAnios(select){
+    var anioActual = new Date().getFullYear();
+    var opciones = '';
+    for(var a = anioActual + 1; a >= anioActual - 6; a--){
+      opciones += '<option value="'+a+'">'+a+'</option>';
+    }
+    select.innerHTML = opciones;
+    select.value = anioActual;
+  }
+
+  function prepararFormularioNuevo(){
+    document.getElementById('tituloFormPago').textContent = 'Añadir Pago';
+    document.getElementById('avisoFormPago').classList.remove('visible');
+    document.getElementById('formPago').reset();
+    document.getElementById('pagoId').value = '';
+    poblarSelectPropietarios(document.getElementById('campoPropietario'), false);
+    document.getElementById('campoPropietario').value = '';
+    resetearSelect(document.getElementById('campoTipo'), 'Seleccioná un propietario primero');
+    resetearSelect(document.getElementById('campoFactura'), 'Seleccioná un tipo primero');
+    resetearSelect(document.getElementById('campoPeriodoValor'), 'Seleccioná un tipo primero');
+    poblarAnios(document.getElementById('campoAnio'));
+    document.getElementById('campoFecha').value = new Date().toISOString().slice(0,10);
+  }
+
+  function resetearSelect(select, textoVacio){
+    select.innerHTML = '<option value="">'+textoVacio+'</option>';
+    select.disabled = true;
+  }
+
+  document.getElementById('campoPropietario').addEventListener('change', function(){
+    var propietarioId = this.value;
+    var campoTipo = document.getElementById('campoTipo');
+    if(!propietarioId){
+      resetearSelect(campoTipo, 'Seleccioná un propietario primero');
+      resetearSelect(document.getElementById('campoFactura'), 'Seleccioná un tipo primero');
+      resetearSelect(document.getElementById('campoPeriodoValor'), 'Seleccioná un tipo primero');
+      return;
+    }
+    var facturas = db.get(CLAVES.facturas, []).filter(function(f){ return f.propietarioId === propietarioId; });
+    var tiposDisponibles = Array.from(new Set(facturas.map(function(f){ return f.tipo; })));
+    if(tiposDisponibles.length === 0){
+      resetearSelect(campoTipo, 'Este propietario no tiene facturas cargadas');
+      resetearSelect(document.getElementById('campoFactura'), 'Sin facturas disponibles');
+      resetearSelect(document.getElementById('campoPeriodoValor'), 'Sin facturas disponibles');
+      return;
+    }
+    campoTipo.disabled = false;
+    campoTipo.innerHTML = '<option value="">Seleccionar…</option>' + tiposDisponibles.map(function(t){
+      return '<option value="'+t+'">'+TIPO_ETIQUETA[t]+'</option>';
+    }).join('');
+    resetearSelect(document.getElementById('campoFactura'), 'Seleccioná un tipo primero');
+    resetearSelect(document.getElementById('campoPeriodoValor'), 'Seleccioná un tipo primero');
+  });
+
+  document.getElementById('campoTipo').addEventListener('change', function(){
+    var propietarioId = document.getElementById('campoPropietario').value;
+    var tipo = this.value;
+    var campoFactura = document.getElementById('campoFactura');
+    if(!tipo){
+      resetearSelect(campoFactura, 'Seleccioná un tipo primero');
+      resetearSelect(document.getElementById('campoPeriodoValor'), 'Seleccioná un tipo primero');
+      return;
+    }
+    var facturas = db.get(CLAVES.facturas, []).filter(function(f){
+      return f.propietarioId === propietarioId && f.tipo === tipo;
+    });
+    campoFactura.disabled = false;
+    campoFactura.innerHTML = '<option value="">Seleccionar…</option>' + facturas.map(function(f){
+      return '<option value="'+f.id+'">'+escapeHtml(f.numero)+'</option>';
+    }).join('');
+
+    var campoPeriodo = document.getElementById('campoPeriodoValor');
+    campoPeriodo.disabled = false;
+    var listaPeriodos = (tipo === 'Agua') ? BIMESTRES : MESES;
+    campoPeriodo.innerHTML = '<option value="">Seleccionar…</option>' + listaPeriodos.map(function(per){
+      return '<option value="'+per+'">'+per+'</option>';
+    }).join('');
+  });
+
+  document.getElementById('btnCancelarPago').addEventListener('click', function(){
+    estado.editandoPagoId = null;
+    mostrarTab('tab-pagos');
+  });
+
+  function cargarPagoParaEditar(id){
+    var pago = db.get(CLAVES.pagos, []).filter(function(p){ return p.id === id; })[0];
+    if(!pago) return;
+    estado.editandoPagoId = id;
+    mostrarTab('tab-nuevo');
+
+    document.getElementById('tituloFormPago').textContent = 'Editar Pago';
+    document.getElementById('avisoFormPago').classList.remove('visible');
+    document.getElementById('pagoId').value = pago.id;
+    document.getElementById('campoFecha').value = pago.fecha;
+
+    poblarSelectPropietarios(document.getElementById('campoPropietario'), false);
+    document.getElementById('campoPropietario').value = pago.propietarioId;
+    document.getElementById('campoPropietario').dispatchEvent(new Event('change'));
+
+    document.getElementById('campoTipo').value = pago.tipo;
+    document.getElementById('campoTipo').dispatchEvent(new Event('change'));
+
+    document.getElementById('campoFactura').value = pago.facturaId;
+
+    poblarAnios(document.getElementById('campoAnio'));
+    var partesPeriodo = separarPeriodo(pago.periodo);
+    document.getElementById('campoPeriodoValor').value = partesPeriodo.valor;
+    document.getElementById('campoAnio').value = partesPeriodo.anio;
+
+    document.getElementById('campoImporte').value = pago.importe;
+    document.getElementById('campoNroTransaccion').value = pago.nroTransaccion || '';
+    document.getElementById('campoObservaciones').value = pago.observaciones || '';
+  }
+
+  function separarPeriodo(periodo){
+    if(!periodo) return {valor:'', anio: new Date().getFullYear()};
+    var m = periodo.match(/^(.*)\s(\d{4})$/);
+    if(m) return {valor: m[1], anio: m[2]};
+    return {valor: periodo, anio: new Date().getFullYear()};
+  }
+
+  document.getElementById('formPago').addEventListener('submit', function(e){
+    e.preventDefault();
+    var aviso = document.getElementById('avisoFormPago');
+    aviso.classList.remove('visible');
+
+    var propietarioId = document.getElementById('campoPropietario').value;
+    var tipo = document.getElementById('campoTipo').value;
+    var facturaId = document.getElementById('campoFactura').value;
+    var periodoValor = document.getElementById('campoPeriodoValor').value;
+    var anio = document.getElementById('campoAnio').value;
+    var fecha = document.getElementById('campoFecha').value;
+    var importe = document.getElementById('campoImporte').value;
+
+    if(!propietarioId || !tipo || !facturaId || !periodoValor || !anio || !fecha || importe === ''){
+      aviso.textContent = 'Completá todos los campos obligatorios antes de guardar.';
+      aviso.classList.add('visible');
+      return;
+    }
+    if(parseFloat(importe) < 0){
+      aviso.textContent = 'El importe no puede ser negativo.';
+      aviso.classList.add('visible');
+      return;
+    }
+
+    var pagos = db.get(CLAVES.pagos, []);
+    var idExistente = document.getElementById('pagoId').value;
+    var registro = {
+      id: idExistente || generarId(),
+      fecha: fecha,
+      propietarioId: propietarioId,
+      tipo: tipo,
+      facturaId: facturaId,
+      periodo: periodoValor + ' ' + anio,
+      importe: parseFloat(importe).toFixed(2),
+      nroTransaccion: document.getElementById('campoNroTransaccion').value.trim(),
+      observaciones: document.getElementById('campoObservaciones').value.trim()
+    };
+
+    if(idExistente){
+      pagos = pagos.map(function(p){ return p.id === idExistente ? registro : p; });
+    } else {
+      pagos.push(registro);
+    }
+    db.set(CLAVES.pagos, pagos);
+    estado.editandoPagoId = null;
+    mostrarTab('tab-pagos');
+  });
+
+  /* =========================================================
+     9. IMPRESIÓN
+  ========================================================= */
+  document.getElementById('btnImprimir').addEventListener('click', function(){
+    window.print();
+  });
+
+  /* =========================================================
+     10. EXPORTAR / IMPORTAR CSV
+  ========================================================= */
+  document.getElementById('btnExportarCSV').addEventListener('click', function(){
+    var filas = obtenerPagosFiltrados();
+    var encabezado = ['Propietario','Tipo de factura','Factura','Periodo','Importe','Nro. Transacción','Observaciones','Fecha de pago'];
+    var lineas = [encabezado.join(',')];
+    filas.forEach(function(p){
+      lineas.push([
+        escaparCSV(p.propNombre),
+        escaparCSV(TIPO_ETIQUETA[p.tipo]),
+        escaparCSV(p.facturaNum),
+        escaparCSV(p.periodo),
+        escaparCSV(p.importe),
+        escaparCSV(p.nroTransaccion),
+        escaparCSV(p.observaciones),
+        escaparCSV(p.fecha)
+      ].join(','));
+    });
+    var blob = new Blob(["\uFEFF" + lineas.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'pagos_servicios_' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('btnImportarCSV').addEventListener('click', function(){
+    document.getElementById('inputImportarCSV').click();
+  });
+
+  document.getElementById('inputImportarCSV').addEventListener('change', function(e){
+    var archivo = e.target.files[0];
+    if(!archivo) return;
+    var lector = new FileReader();
+    lector.onload = function(ev){
+      procesarCSVImportado(ev.target.result);
+      e.target.value = '';
+    };
+    lector.readAsText(archivo, 'UTF-8');
+  });
+
+  function parsearLineaCSV(linea){
+    var resultado = [];
+    var actual = '';
+    var dentroComillas = false;
+    for(var i=0; i<linea.length; i++){
+      var c = linea[i];
+      if(dentroComillas){
+        if(c === '"'){
+          if(linea[i+1] === '"'){ actual += '"'; i++; }
+          else dentroComillas = false;
+        } else actual += c;
+      } else {
+        if(c === '"') dentroComillas = true;
+        else if(c === ','){ resultado.push(actual); actual=''; }
+        else actual += c;
+      }
+    }
+    resultado.push(actual);
+    return resultado;
+  }
+
+  function procesarCSVImportado(texto){
+    var lineas = texto.replace(/^\uFEFF/, '').split(/\r\n|\n/).filter(function(l){ return l.trim() !== ''; });
+    if(lineas.length < 2){
+      alert('El archivo CSV no contiene filas de datos.');
+      return;
+    }
+    var propietarios = db.get(CLAVES.propietarios, []);
+    var facturas = db.get(CLAVES.facturas, []);
+    var pagos = db.get(CLAVES.pagos, []);
+    var importadas = 0, errores = 0, detalleErrores = [];
+
+    // Las columnas se ubican por el nombre del encabezado; si el CSV es antiguo (sin Nro. Transacción) se usan las posiciones originales
+    function normalizarEnc(t){ return String(t||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+    var encabezados = parsearLineaCSV(lineas[0]).map(normalizarEnc);
+    var idxNro = encabezados.indexOf('nro. transaccion');
+    var idxObs = encabezados.indexOf('observaciones'); if(idxObs < 0) idxObs = 5;
+    var idxFecha = encabezados.indexOf('fecha de pago'); if(idxFecha < 0) idxFecha = 6;
+
+    for(var i=1; i<lineas.length; i++){
+      var cols = parsearLineaCSV(lineas[i]);
+      var nombrePropietario = (cols[0]||'').trim();
+      var tipoEtiqueta = (cols[1]||'').trim();
+      var numeroFactura = (cols[2]||'').trim();
+      var periodo = (cols[3]||'').trim();
+      var importe = (cols[4]||'').trim();
+      var nroTransaccion = idxNro >= 0 ? (cols[idxNro]||'').trim() : '';
+      var observaciones = (cols[idxObs]||'').trim();
+      var fecha = (cols[idxFecha]||'').trim() || new Date().toISOString().slice(0,10);
+
+      var tipoInterno = Object.keys(TIPO_ETIQUETA).filter(function(k){ return TIPO_ETIQUETA[k] === tipoEtiqueta; })[0];
+
+      var propietario = propietarios.filter(function(p){ return p.nombre.toLowerCase() === nombrePropietario.toLowerCase(); })[0];
+      if(!propietario || !tipoInterno){
+        errores++; detalleErrores.push('Fila ' + (i+1) + ': propietario o tipo de factura no reconocido.');
+        continue;
+      }
+      var factura = facturas.filter(function(f){
+        return f.propietarioId === propietario.id && f.tipo === tipoInterno && f.numero.toLowerCase() === numeroFactura.toLowerCase();
+      })[0];
+      if(!factura){
+        errores++; detalleErrores.push('Fila ' + (i+1) + ': la factura "' + numeroFactura + '" no existe para ese propietario/tipo.');
+        continue;
+      }
+      var importeNum = parseFloat(importe.replace(',','.'));
+      if(isNaN(importeNum)){
+        errores++; detalleErrores.push('Fila ' + (i+1) + ': importe inválido.');
+        continue;
+      }
+      pagos.push({
+        id: generarId(),
+        fecha: /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : new Date().toISOString().slice(0,10),
+        propietarioId: propietario.id,
+        tipo: tipoInterno,
+        facturaId: factura.id,
+        periodo: periodo,
+        importe: importeNum.toFixed(2),
+        nroTransaccion: nroTransaccion,
+        observaciones: observaciones
+      });
+      importadas++;
+    }
+    db.set(CLAVES.pagos, pagos);
+    renderTablaPagos();
+    var mensaje = importadas + ' fila(s) importada(s) correctamente.';
+    if(errores > 0){
+      mensaje += '\n' + errores + ' fila(s) con error:\n' + detalleErrores.slice(0,10).join('\n');
+      if(detalleErrores.length > 10) mensaje += '\n… y ' + (detalleErrores.length-10) + ' más.';
+    }
+    alert(mensaje);
+  }
+
+  /* =========================================================
+     11. ESTADÍSTICAS (RESUMEN POR PERÍODO)
+  ========================================================= */
+  function renderEstadisticas(){
+    var pagos = db.get(CLAVES.pagos, []);
+    var propietarios = db.get(CLAVES.propietarios, []);
+    var facturas = db.get(CLAVES.facturas, []);
+
+    function nombrePropietario(id){
+      var p = propietarios.filter(function(x){return x.id===id;})[0];
+      return p ? p.nombre : '(sin propietario)';
+    }
+    function numeroFactura(id){
+      var f = facturas.filter(function(x){return x.id===id;})[0];
+      return f ? f.numero : '';
+    }
+
+    var total = pagos.reduce(function(acc,p){ return acc + parseFloat(p.importe||0); }, 0);
+    var statsHtml =
+      '<div class="stat-card"><div class="valor">' + pagos.length + '</div><div class="etiqueta">Pagos registrados</div></div>' +
+      '<div class="stat-card"><div class="valor">$ ' + formatearImporte(total) + '</div><div class="etiqueta">Importe total pagado</div></div>' +
+      '<div class="stat-card"><div class="valor">' + propietarios.length + '</div><div class="etiqueta">Propietarios</div></div>' +
+      '<div class="stat-card"><div class="valor">' + facturas.length + '</div><div class="etiqueta">Facturas registradas</div></div>';
+    document.getElementById('statsTotales').innerHTML = statsHtml;
+
+    var grupos = {};
+    pagos.forEach(function(p){
+      if(!grupos[p.periodo]) grupos[p.periodo] = [];
+      grupos[p.periodo].push(p);
+    });
+
+    var periodosOrdenados = Object.keys(grupos).sort(function(a,b){ return b.localeCompare(a); });
+    var contenedor = document.getElementById('tarjetasPeriodo');
+
+    if(periodosOrdenados.length === 0){
+      contenedor.innerHTML = '<div class="estado-vacio">Todavía no hay pagos registrados para mostrar estadísticas.</div>';
+      return;
+    }
+
+    contenedor.innerHTML = periodosOrdenados.map(function(periodo){
+      var filas = grupos[periodo].map(function(p){
+        return '<tr><td>'+escapeHtml(nombrePropietario(p.propietarioId))+'</td>' +
+               '<td>'+TIPO_ETIQUETA[p.tipo]+'</td>' +
+               '<td>'+escapeHtml(numeroFactura(p.facturaId))+'</td></tr>';
+      }).join('');
+      return '<div class="tarjeta-periodo">' +
+        '<h3>' + escapeHtml(periodo) + '</h3>' +
+        '<div class="scroll-x"><table><thead><tr><th>Propietario</th><th>Tipo de factura</th><th>Factura</th></tr></thead>' +
+        '<tbody>' + filas + '</tbody></table></div></div>';
+    }).join('');
+  }
+
+  /* =========================================================
+     12. DATOS MAESTROS
+  ========================================================= */
+  function renderTabMaestros(){
+    poblarSelectPropietarios(document.getElementById('campoFacturaPropietario'), false);
+    renderListaPropietarios();
+    renderListaFacturas();
+  }
+
+  var editandoPropietarioId = null;
+  var editandoFacturaId = null;
+
+  function ordenarPorNombre(a,b){ return a.nombre.localeCompare(b.nombre); }
+
+  /* ---------- Propietarios ---------- */
+  function renderListaPropietarios(){
+    var propietarios = db.get(CLAVES.propietarios, []).slice().sort(ordenarPorNombre);
+    var facturas = db.get(CLAVES.facturas, []);
+    var ul = document.getElementById('listaPropietarios');
+
+    if(propietarios.length === 0){
+      ul.innerHTML = '<li><span style="color:var(--gris-500);">Todavía no hay propietarios cargados.</span></li>';
+      return;
+    }
+    ul.innerHTML = propietarios.map(function(p){
+      var cantFacturas = facturas.filter(function(f){return f.propietarioId===p.id;}).length;
+      return '<li>' +
+        '<div class="info"><b>'+escapeHtml(p.nombre)+'</b><span>'+cantFacturas+' factura(s) asociada(s)</span></div>' +
+        '<span style="white-space:nowrap;">' +
+          '<button class="icono-solo" data-accion="editar-propietario" data-id="'+p.id+'" title="Editar propietario">✏️</button>' +
+          '<button class="icono-solo" data-accion="eliminar-propietario" data-id="'+p.id+'" title="Eliminar propietario">🗑️</button>' +
+        '</span></li>';
+    }).join('');
+  }
+
+  function resetFormPropietario(){
+    editandoPropietarioId = null;
+    document.getElementById('campoNombrePropietario').value = '';
+    document.getElementById('btnGuardarPropietario').textContent = '➕ Añadir';
+    document.getElementById('btnCancelarPropietario').style.display = 'none';
+  }
+
+  document.getElementById('formPropietario').addEventListener('submit', function(e){
+    e.preventDefault();
+    var input = document.getElementById('campoNombrePropietario');
+    var nombre = input.value.trim();
+    if(!nombre) return;
+    var propietarios = db.get(CLAVES.propietarios, []);
+    var duplicado = propietarios.some(function(p){
+      return p.id !== editandoPropietarioId && p.nombre.toLowerCase() === nombre.toLowerCase();
+    });
+    if(duplicado){
+      alert('Ya existe un propietario con ese nombre.');
+      return;
+    }
+    if(editandoPropietarioId){
+      propietarios = propietarios.map(function(p){
+        return p.id === editandoPropietarioId ? {id:p.id, nombre:nombre} : p;
+      });
+    } else {
+      propietarios.push({id: generarId(), nombre: nombre});
+    }
+    db.set(CLAVES.propietarios, propietarios);
+    resetFormPropietario();
+    renderTabMaestros();
+  });
+
+  document.getElementById('btnCancelarPropietario').addEventListener('click', resetFormPropietario);
+
+  document.getElementById('listaPropietarios').addEventListener('click', function(e){
+    var btn = e.target.closest('button');
+    if(!btn) return;
+    var id = btn.dataset.id;
+
+    if(btn.dataset.accion === 'editar-propietario'){
+      var p = db.get(CLAVES.propietarios, []).filter(function(x){ return x.id === id; })[0];
+      if(!p) return;
+      editandoPropietarioId = id;
+      var input = document.getElementById('campoNombrePropietario');
+      input.value = p.nombre;
+      document.getElementById('btnGuardarPropietario').textContent = '💾 Guardar';
+      document.getElementById('btnCancelarPropietario').style.display = 'inline-flex';
+      input.focus();
+      return;
+    }
+
+    if(btn.dataset.accion === 'eliminar-propietario'){
+      var tieneFacturas = db.get(CLAVES.facturas, []).some(function(f){ return f.propietarioId === id; });
+      if(tieneFacturas){
+        alert('No se puede eliminar: este propietario tiene facturas asociadas. Eliminá primero sus facturas.');
+        return;
+      }
+      if(confirm('¿Eliminar este propietario?')){
+        var propietarios = db.get(CLAVES.propietarios, []).filter(function(x){ return x.id !== id; });
+        db.set(CLAVES.propietarios, propietarios);
+        if(editandoPropietarioId === id) resetFormPropietario();
+        renderTabMaestros();
+      }
+    }
+  });
+
+  /* ---------- Facturas ---------- */
+  function renderListaFacturas(){
+    var propietarios = db.get(CLAVES.propietarios, []).slice().sort(ordenarPorNombre);
+    var facturas = db.get(CLAVES.facturas, []);
+    var contenedor = document.getElementById('listaFacturasPorPropietario');
+
+    if(propietarios.length === 0){
+      contenedor.innerHTML = '<p class="ayuda" style="margin-top:14px;">Cargá primero un propietario.</p>';
+      return;
+    }
+
+    var html = '';
+    propietarios.forEach(function(p){
+      var deEstePropietario = facturas.filter(function(f){ return f.propietarioId === p.id; });
+      if(deEstePropietario.length === 0) return;
+      html += '<div class="grupo-propietario"><h4>' + escapeHtml(p.nombre) + '</h4><ul class="lista-simple">';
+      deEstePropietario.forEach(function(f){
+        html += '<li><div class="info"><b>'+escapeHtml(f.numero)+'</b><span class="badge-tipo badge-'+f.tipo+'" style="margin-top:3px;">'+TIPO_ETIQUETA[f.tipo]+'</span></div>' +
+          '<span style="white-space:nowrap;">' +
+            '<button class="icono-solo" data-accion="editar-factura" data-id="'+f.id+'" title="Editar factura">✏️</button>' +
+            '<button class="icono-solo" data-accion="eliminar-factura" data-id="'+f.id+'" title="Eliminar factura">🗑️</button>' +
+          '</span></li>';
+      });
+      html += '</ul></div>';
+    });
+    contenedor.innerHTML = html || '<p class="ayuda" style="margin-top:14px;">Ningún propietario tiene facturas cargadas todavía.</p>';
+  }
+
+  function resetFormFactura(){
+    editandoFacturaId = null;
+    document.getElementById('campoFacturaNumero').value = '';
+    document.getElementById('campoFacturaTipo').value = '';
+    document.getElementById('campoFacturaPropietario').value = '';
+    document.getElementById('campoFacturaPropietario').disabled = false;
+    document.getElementById('campoFacturaTipo').disabled = false;
+    document.getElementById('btnGuardarFactura').textContent = '➕ Añadir factura';
+    document.getElementById('btnCancelarFactura').style.display = 'none';
+    document.getElementById('avisoFactura').classList.remove('visible');
+  }
+
+  document.getElementById('btnCancelarFactura').addEventListener('click', resetFormFactura);
+
+  document.getElementById('formFactura').addEventListener('submit', function(e){
+    e.preventDefault();
+    var selProp = document.getElementById('campoFacturaPropietario');
+    var selTipo = document.getElementById('campoFacturaTipo');
+    var propietarioId = selProp.value;
+    var tipo = selTipo.value;
+    var numero = document.getElementById('campoFacturaNumero').value.trim();
+    if(!propietarioId || !tipo || !numero) return;
+
+    var facturas = db.get(CLAVES.facturas, []);
+    var duplicada = facturas.some(function(f){
+      return f.id !== editandoFacturaId && f.propietarioId===propietarioId && f.tipo===tipo && f.numero.toLowerCase()===numero.toLowerCase();
+    });
+    if(duplicada){
+      alert('Ese propietario ya tiene una factura con ese número para ese tipo de servicio.');
+      return;
+    }
+    if(editandoFacturaId){
+      var original = facturas.filter(function(f){ return f.id === editandoFacturaId; })[0];
+      var cambioPropietario = original && original.propietarioId !== propietarioId;
+      if(cambioPropietario){
+        var pagosAfectados = db.get(CLAVES.pagos, []).filter(function(pg){ return pg.facturaId === editandoFacturaId; });
+        if(pagosAfectados.length > 0){
+          if(!confirm('Esta factura tiene ' + pagosAfectados.length + ' pago(s) registrado(s). Al reasignarla, esos pagos también pasarán al nuevo propietario. ¿Continuar?')) return;
+          var pagos = db.get(CLAVES.pagos, []).map(function(pg){
+            return pg.facturaId === editandoFacturaId ? Object.assign({}, pg, {propietarioId: propietarioId}) : pg;
+          });
+          db.set(CLAVES.pagos, pagos);
+        }
+      }
+      facturas = facturas.map(function(f){
+        return f.id === editandoFacturaId ? {id:f.id, propietarioId:propietarioId, tipo:tipo, numero:numero} : f;
+      });
+    } else {
+      facturas.push({id: generarId(), propietarioId: propietarioId, tipo: tipo, numero: numero});
+    }
+    db.set(CLAVES.facturas, facturas);
+    resetFormFactura();
+    renderTabMaestros();
+  });
+
+  document.getElementById('listaFacturasPorPropietario').addEventListener('click', function(e){
+    var btn = e.target.closest('button');
+    if(!btn) return;
+    var id = btn.dataset.id;
+
+    if(btn.dataset.accion === 'editar-factura'){
+      var f = db.get(CLAVES.facturas, []).filter(function(x){ return x.id === id; })[0];
+      if(!f) return;
+      var tienePagosAsociados = db.get(CLAVES.pagos, []).some(function(pg){ return pg.facturaId === id; });
+      editandoFacturaId = id;
+      poblarSelectPropietarios(document.getElementById('campoFacturaPropietario'), false);
+      document.getElementById('campoFacturaPropietario').value = f.propietarioId;
+      document.getElementById('campoFacturaTipo').value = f.tipo;
+      document.getElementById('campoFacturaNumero').value = f.numero;
+      // Si ya tiene pagos, el tipo queda fijo (el formato del período depende de él); el propietario sí se puede reasignar
+      document.getElementById('campoFacturaPropietario').disabled = false;
+      document.getElementById('campoFacturaTipo').disabled = tienePagosAsociados;
+      var aviso = document.getElementById('avisoFactura');
+      if(tienePagosAsociados){
+        aviso.textContent = 'Esta factura tiene pagos registrados: podés cambiar su número y reasignarla a otro propietario (sus pagos se moverán con ella). El tipo no se puede modificar.';
+        aviso.classList.add('visible');
+      } else {
+        aviso.classList.remove('visible');
+      }
+      document.getElementById('btnGuardarFactura').textContent = '💾 Guardar cambios';
+      document.getElementById('btnCancelarFactura').style.display = 'inline-flex';
+      document.getElementById('campoFacturaNumero').focus();
+      return;
+    }
+
+    if(btn.dataset.accion === 'eliminar-factura'){
+      var tienePagos = db.get(CLAVES.pagos, []).some(function(p){ return p.facturaId === id; });
+      if(tienePagos){
+        alert('No se puede eliminar: esta factura tiene pagos registrados. Eliminá primero esos pagos.');
+        return;
+      }
+      if(confirm('¿Eliminar esta factura?')){
+        var facturas = db.get(CLAVES.facturas, []).filter(function(x){ return x.id !== id; });
+        db.set(CLAVES.facturas, facturas);
+        if(editandoFacturaId === id) resetFormFactura();
+        renderTabMaestros();
+      }
+    }
+  });
+
+  /* =========================================================
+     13. AYUDA (VENTANA MODAL DE SOLO LECTURA)
+  ========================================================= */
+  // Para cambiar el contenido de ayuda, editá el texto de la variable TEXTO_AYUDA a continuación.
+  var TEXTO_AYUDA =
+"Cómo usar esta planilla\n\n" +
+"1) Cargá primero tus propietarios en Datos Maestros.\n" +
+"2) Para cada propietario, cargá sus facturas (tipo de servicio + número).\n" +
+"3) Usá Añadir / Editar Pago para registrar cada pago realizado.\n" +
+"4) En Servicios Pagados podés buscar rápido, imprimir o exportar a CSV.\n" +
+"5) En Búsqueda Avanzada podés combinar filtros; quedan guardados hasta que los limpies.\n" + "\n" + "Herramienta desarrollada con asistencia IA por: " + "\n"+"Ing.Giuseppe." + "\n" + "correo: gigapepe2000@gmail.com";
+
+  function abrirModalAyuda(){
+    document.getElementById('cuerpoAyudaVista').innerHTML = escapeHtml(TEXTO_AYUDA);
+    document.getElementById('modalAyuda').classList.add('visible');
+  }
+  function cerrarModalAyuda(){
+    document.getElementById('modalAyuda').classList.remove('visible');
+  }
+
+  document.getElementById('btnAyuda').addEventListener('click', abrirModalAyuda);
+  document.getElementById('btnCerrarAyuda').addEventListener('click', cerrarModalAyuda);
+  document.getElementById('btnCerrarAyudaPie').addEventListener('click', cerrarModalAyuda);
+  document.getElementById('modalAyuda').addEventListener('click', function(e){
+    if(e.target.id === 'modalAyuda') cerrarModalAyuda();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && document.getElementById('modalAyuda').classList.contains('visible')) cerrarModalAyuda();
+  });
+
+  /* =========================================================
+     14. EXPORTAR / IMPORTAR CSV — DATOS MAESTROS
+  ========================================================= */
+  document.getElementById('btnExportarMaestrosCSV').addEventListener('click', function(){
+    var propietarios = db.get(CLAVES.propietarios, []);
+    var facturas = db.get(CLAVES.facturas, []);
+    var propietariosPorId = {};
+    propietarios.forEach(function(p){ propietariosPorId[p.id] = p.nombre; });
+
+    var lineas = ['Tipo de registro,Propietario,Tipo de factura,Numero de factura'];
+    propietarios.forEach(function(p){
+      lineas.push(['PROPIETARIO', escaparCSV(p.nombre), '', ''].join(','));
+    });
+    facturas.forEach(function(f){
+      lineas.push(['FACTURA', escaparCSV(propietariosPorId[f.propietarioId] || ''), escaparCSV(TIPO_ETIQUETA[f.tipo] || ''), escaparCSV(f.numero)].join(','));
+    });
+
+    var blob = new Blob(["\uFEFF" + lineas.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'datos_maestros_' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('btnImportarMaestrosCSV').addEventListener('click', function(){
+    document.getElementById('inputImportarMaestrosCSV').click();
+  });
+
+  document.getElementById('inputImportarMaestrosCSV').addEventListener('change', function(e){
+    var archivo = e.target.files[0];
+    if(!archivo) return;
+    var lector = new FileReader();
+    lector.onload = function(ev){
+      procesarCSVMaestrosImportado(ev.target.result);
+      e.target.value = '';
+    };
+    lector.readAsText(archivo, 'UTF-8');
+  });
+
+  function procesarCSVMaestrosImportado(texto){
+    var lineas = texto.replace(/^\uFEFF/, '').split(/\r\n|\n/).filter(function(l){ return l.trim() !== ''; });
+    if(lineas.length < 2){
+      alert('El archivo CSV no contiene filas de datos.');
+      return;
+    }
+    var propietarios = db.get(CLAVES.propietarios, []);
+    var facturas = db.get(CLAVES.facturas, []);
+    var propietariosNuevos = 0, facturasNuevas = 0, errores = 0, detalleErrores = [];
+
+    for(var i=1; i<lineas.length; i++){
+      var cols = parsearLineaCSV(lineas[i]);
+      var tipoRegistro = (cols[0]||'').trim().toUpperCase();
+      var nombrePropietario = (cols[1]||'').trim();
+      var tipoEtiqueta = (cols[2]||'').trim();
+      var numeroFactura = (cols[3]||'').trim();
+
+      if(!nombrePropietario){
+        errores++; detalleErrores.push('Fila ' + (i+1) + ': falta el nombre del propietario.');
+        continue;
+      }
+
+      var propietario = propietarios.filter(function(p){ return p.nombre.toLowerCase() === nombrePropietario.toLowerCase(); })[0];
+      if(!propietario){
+        propietario = {id: generarId(), nombre: nombrePropietario};
+        propietarios.push(propietario);
+        propietariosNuevos++;
+      }
+
+      if(tipoRegistro === 'FACTURA'){
+        var tipoInterno = Object.keys(TIPO_ETIQUETA).filter(function(k){ return TIPO_ETIQUETA[k].toLowerCase() === tipoEtiqueta.toLowerCase(); })[0];
+        if(!tipoInterno || !numeroFactura){
+          errores++; detalleErrores.push('Fila ' + (i+1) + ': tipo de factura o número inválido.');
+          continue;
+        }
+        var yaExiste = facturas.some(function(f){
+          return f.propietarioId === propietario.id && f.tipo === tipoInterno && f.numero.toLowerCase() === numeroFactura.toLowerCase();
+        });
+        if(!yaExiste){
+          facturas.push({id: generarId(), propietarioId: propietario.id, tipo: tipoInterno, numero: numeroFactura});
+          facturasNuevas++;
+        }
+      }
+    }
+
+    db.set(CLAVES.propietarios, propietarios);
+    db.set(CLAVES.facturas, facturas);
+    renderTabMaestros();
+
+    var mensaje = propietariosNuevos + ' propietario(s) nuevo(s) y ' + facturasNuevas + ' factura(s) nueva(s) importada(s).';
+    if(errores > 0){
+      mensaje += '\n' + errores + ' fila(s) con error:\n' + detalleErrores.slice(0,10).join('\n');
+      if(detalleErrores.length > 10) mensaje += '\n… y ' + (detalleErrores.length-10) + ' más.';
+    }
+    alert(mensaje);
+  }
+
+  /* =========================================================
+     15. INICIALIZACIÓN
+  ========================================================= */
+  mostrarTab('tab-pagos');
+
+})();
+</script>
+</body>
+</html>
